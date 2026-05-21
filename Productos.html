@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Productos · Zarah's Floristería</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="productos.css">
+<link rel="stylesheet" href="product-modal.css">
+<link rel="stylesheet" href="whatsapp.css">
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <a class="nav-logo" href="Landing.html">
+    <span class="nav-logo-mark" style="color:#c75a87">
+      <svg width="42" height="42" viewBox="0 0 44 44" fill="none">
+        <circle cx="22" cy="22" r="20.5" fill="#fde6ee"/>
+        <circle cx="22" cy="22" r="20.5" stroke="currentColor" stroke-width="0.7" opacity="0.55"/>
+        <circle cx="22" cy="22" r="17" stroke="currentColor" stroke-width="0.4" opacity="0.3"/>
+        <g transform="translate(22 2.5)">
+          <circle r="2.2" fill="#c75a87"/>
+          <path d="M-1.8 -0.3 Q-1 -1.8, 0 -1.5 Q1 -1.8, 1.8 -0.3 Q1.8 0.9, 0.9 1.2 Q0 0.6, -0.9 1.2 Q-1.8 0.9, -1.8 -0.3 Z" fill="#a83e6c"/>
+        </g>
+        <g transform="translate(22 41.5)">
+          <circle r="2.2" fill="#c75a87"/>
+          <path d="M-1.8 -0.3 Q-1 -1.8, 0 -1.5 Q1 -1.8, 1.8 -0.3 Q1.8 0.9, 0.9 1.2 Q0 0.6, -0.9 1.2 Q-1.8 0.9, -1.8 -0.3 Z" fill="#a83e6c"/>
+        </g>
+        <path d="M1 22 Q3 20.5, 5 22 Q3 23.5, 1 22 Z" fill="#7a8f5e"/>
+        <path d="M43 22 Q41 20.5, 39 22 Q41 23.5, 43 22 Z" fill="#7a8f5e"/>
+        <path d="M11.5 14.5 C 13 13, 16 12.4, 21 12.4 L 22.5 12.4 Q 22.8 13.2, 22 14 L 14.8 26.6 C 17.5 26.4, 20.5 26.6, 22.5 27.6 Q 22.4 28.6, 21.5 28.9 C 18 28.3, 14 28.5, 11.5 29.4 Q 11.2 28.7, 11.7 27.9 L 19 15.4 C 16.5 15.4, 14 15.7, 12.2 16.4 Q 11.4 15.6, 11.5 14.5 Z" fill="currentColor"/>
+        <path d="M27.5 10 Q 28.5 10, 28.6 11 L 27 23.5 Q 29 20.5, 31.5 20.5 Q 34.2 20.5, 33.7 23.3 L 32.6 30 Q 32.5 31, 33.2 31 Q 34 31, 34.8 29.8 L 35.3 30.1 Q 34.2 32, 32.5 32 Q 30.8 32, 31 30 L 32 23.6 Q 32.3 22.2, 31.2 22.2 Q 29.5 22.2, 28 24.5 Q 27.3 26, 26.8 28 L 26.4 32 L 24.7 32 L 26.5 10.8 Q 26.6 10, 27.5 10 Z" fill="currentColor"/>
+      </svg>
+    </span>
+    <span class="nav-wordmark">
+      <!-- HIBISCUS top-left -->
+      <svg class="flor flor-hib" width="34" height="34" viewBox="0 0 30 30" aria-hidden="true">
+        <g transform="translate(15 14)">
+          <g transform="rotate(0)"><path d="M0 -2 C -4 -3, -5.5 -8, -3 -11 C 0 -12.5, 3 -12.5, 3 -11 C 5.5 -8, 4 -3, 0 -2 Z" fill="#d96b8e"/></g>
+          <g transform="rotate(72)"><path d="M0 -2 C -4 -3, -5.5 -8, -3 -11 C 0 -12.5, 3 -12.5, 3 -11 C 5.5 -8, 4 -3, 0 -2 Z" fill="#d96b8e"/></g>
+          <g transform="rotate(144)"><path d="M0 -2 C -4 -3, -5.5 -8, -3 -11 C 0 -12.5, 3 -12.5, 3 -11 C 5.5 -8, 4 -3, 0 -2 Z" fill="#d96b8e"/></g>
+          <g transform="rotate(216)"><path d="M0 -2 C -4 -3, -5.5 -8, -3 -11 C 0 -12.5, 3 -12.5, 3 -11 C 5.5 -8, 4 -3, 0 -2 Z" fill="#d96b8e"/></g>
+          <g transform="rotate(288)"><path d="M0 -2 C -4 -3, -5.5 -8, -3 -11 C 0 -12.5, 3 -12.5, 3 -11 C 5.5 -8, 4 -3, 0 -2 Z" fill="#d96b8e"/></g>
+          <path d="M0 0 Q 3 4, 5 8" stroke="#c89b5c" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+          <circle cx="5.2" cy="8.2" r="0.7" fill="#c89b5c"/>
+          <circle cx="3.5" cy="5.5" r="0.5" fill="#c89b5c"/>
+          <circle r="1.6" fill="#8a3724"/>
+        </g>
+      </svg>
+
+      <!-- COSMOS top-right -->
+      <svg class="flor flor-cos" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
+        <g transform="translate(11 11)">
+          <g transform="rotate(0)"><ellipse cx="0" cy="-6.5" rx="1.6" ry="4.2" fill="#e89bbc"/></g>
+          <g transform="rotate(45)"><ellipse cx="0" cy="-6.5" rx="1.6" ry="4.2" fill="#d97da3"/></g>
+          <g transform="rotate(90)"><ellipse cx="0" cy="-6.5" rx="1.6" ry="4.2" fill="#e89bbc"/></g>
+          <g transform="rotate(135)"><ellipse cx="0" cy="-6.5" rx="1.6" ry="4.2" fill="#d97da3"/></g>
+          <g transform="rotate(180)"><ellipse cx="0" cy="-6.5" rx="1.6" ry="4.2" fill="#e89bbc"/></g>
+          <g transform="rotate(225)"><ellipse cx="0" cy="-6.5" rx="1.6" ry="4.2" fill="#d97da3"/></g>
+          <g transform="rotate(270)"><ellipse cx="0" cy="-6.5" rx="1.6" ry="4.2" fill="#e89bbc"/></g>
+          <g transform="rotate(315)"><ellipse cx="0" cy="-6.5" rx="1.6" ry="4.2" fill="#d97da3"/></g>
+          <circle r="1.9" fill="#c89b5c"/>
+        </g>
+      </svg>
+
+      <span class="word-text">Zarah&rsquo;s</span>
+
+      <!-- MARGARITA bottom-left -->
+      <svg class="flor flor-mar" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
+        <g transform="translate(11 11)">
+          <g transform="rotate(0)"><ellipse cx="0" cy="-7" rx="1.1" ry="4" fill="#fff5fa" stroke="#c75a87" stroke-width="0.35"/></g>
+          <g transform="rotate(30)"><ellipse cx="0" cy="-7" rx="1.1" ry="4" fill="#fff5fa" stroke="#c75a87" stroke-width="0.35"/></g>
+          <g transform="rotate(60)"><ellipse cx="0" cy="-7" rx="1.1" ry="4" fill="#fff5fa" stroke="#c75a87" stroke-width="0.35"/></g>
+          <g transform="rotate(90)"><ellipse cx="0" cy="-7" rx="1.1" ry="4" fill="#fff5fa" stroke="#c75a87" stroke-width="0.35"/></g>
+          <g transform="rotate(120)"><ellipse cx="0" cy="-7" rx="1.1" ry="4" fill="#fff5fa" stroke="#c75a87" stroke-width="0.35"/></g>
+          <g transform="rotate(150)"><ellipse cx="0" cy="-7" rx="1.1" ry="4" fill="#fff5fa" stroke="#c75a87" stroke-width="0.35"/></g>
+          <g transform="rotate(180)"><ellipse cx="0" cy="-7" rx="1.1" ry="4" fill="#fff5fa" stroke="#c75a87" stroke-width="0.35"/></g>
+          <g transform="rotate(210)"><ellipse cx="0" cy="-7" rx="1.1" ry="4" fill="#fff5fa" stroke="#c75a87" stroke-width="0.35"/></g>
+          <g transform="rotate(240)"><ellipse cx="0" cy="-7" rx="1.1" ry="4" fill="#fff5fa" stroke="#c75a87" stroke-width="0.35"/></g>
+          <g transform="rotate(270)"><ellipse cx="0" cy="-7" rx="1.1" ry="4" fill="#fff5fa" stroke="#c75a87" stroke-width="0.35"/></g>
+          <g transform="rotate(300)"><ellipse cx="0" cy="-7" rx="1.1" ry="4" fill="#fff5fa" stroke="#c75a87" stroke-width="0.35"/></g>
+          <g transform="rotate(330)"><ellipse cx="0" cy="-7" rx="1.1" ry="4" fill="#fff5fa" stroke="#c75a87" stroke-width="0.35"/></g>
+          <circle r="2.2" fill="#e8a85c"/>
+        </g>
+      </svg>
+
+      <!-- TULIPÁN bottom-right -->
+      <svg class="flor flor-tul" width="20" height="30" viewBox="0 0 22 32" aria-hidden="true">
+        <path d="M11 14 Q 10.5 22, 11 31" stroke="#7a8f5e" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <path d="M11 22 Q 3 19, 4 27 Q 9 25, 11 24 Z" fill="#7a8f5e"/>
+        <path d="M4 11 C 4 7, 6 2, 11 2 C 16 2, 18 7, 18 11 Z" fill="#a83e6c"/>
+        <path d="M7 12 C 7 9, 8 3, 11 3 C 14 3, 15 9, 15 12 Z" fill="#d96b8e"/>
+        <path d="M9 11 C 9 8, 9.5 5, 11 5 C 12.5 5, 13 8, 13 11 Z" fill="#e89bbc" opacity="0.55"/>
+      </svg>
+    </span>
+  </a>
+  <div class="nav-links">
+    <a href="Landing.html">Inicio</a>
+    <a href="Productos.html" class="active">Productos</a>
+    <a href="Landing.html#dedi">Dedicatoria</a>
+    <a href="Landing.html#testi">Historias</a>
+    <a href="Landing.html#contact">Contacto</a>
+  </div>
+  <div class="nav-right">
+    <button class="nav-icon" aria-label="Buscar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    </button>
+    <button class="nav-icon" aria-label="Favoritos">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+    <button class="nav-icon" aria-label="Carrito">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ============ HEADER ============ -->
+<header class="page-head">
+  <div class="eyebrow">Catálogo completo</div>
+  <h1>Decoraciones &amp; <em>adornos</em></h1>
+  <p>Globos, murales, ramos y cajas dedicadas. Más de 160 piezas hechas a mano para cada momento que merece ser recordado.</p>
+</header>
+
+<!-- ============ FILTERS ============ -->
+<div class="filters">
+  <div class="filter-chips" id="chips"></div>
+  <div class="filter-right">
+    <span class="result-count" id="resultCount">— productos</span>
+    <select class="sort-select" id="sortSelect">
+      <option value="default">Ordenar: Destacados</option>
+      <option value="price-asc">Precio: menor a mayor</option>
+      <option value="price-desc">Precio: mayor a menor</option>
+      <option value="name">Nombre A–Z</option>
+    </select>
+  </div>
+</div>
+
+<!-- ============ GRID ============ -->
+<main class="catalog" id="catalog"></main>
+
+<!-- ============ PAGINATION ============ -->
+<div class="pagination" id="pagination"></div>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="foot-row">
+    <div class="foot-logo">Zarah's</div>
+    <div class="foot-links">
+      <a href="Landing.html">Inicio</a>
+      <a href="Productos.html">Productos</a>
+      <a href="Landing.html#dedi">Dedicatoria</a>
+      <a href="Landing.html#contact">Contacto</a>
+    </div>
+  </div>
+  <div class="foot-copy">© 2025 Zarah's Floristería · Hecho con cariño.</div>
+</footer>
+
+<!-- ============ PRODUCT MODAL ============ -->
+<div class="pm-overlay" id="productModal">
+  <div class="pm">
+    <button class="pm-close" data-close aria-label="Cerrar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="pm-img" id="pm-img">
+      <span class="pm-badge" id="pm-badge"></span>
+    </div>
+    <div class="pm-body">
+      <div class="pm-cats" id="pm-cats"></div>
+      <h3 class="pm-name" id="pm-name"></h3>
+      <div class="pm-price" id="pm-price"></div>
+      <div class="pm-save-row" id="pm-save"></div>
+
+      <!-- Personalización (solo si la categoría "Globo Personalizado" está activa) -->
+      <div class="pm-field" id="pm-name-field" style="display:none">
+        <label for="pm-custom-name">
+          <span class="pm-field-title">Personalízalo con el nombre de quien lo recibirá</span>
+          <span class="pm-field-opt">(opcional)</span>
+        </label>
+        <input type="text" id="pm-custom-name" placeholder="Ej. María, Andrés..." maxlength="40">
+        <div class="pm-counter" id="pm-name-counter">0 / 25</div>
+      </div>
+
+      <!-- Tarjeta dedicatoria (siempre disponible) -->
+      <div class="pm-field" id="pm-dedi-field">
+        <label for="pm-dedi">
+          <span class="pm-field-title">Tarjeta de dedicatoria</span>
+          <span class="pm-field-opt">(opcional · hasta 100 palabras)</span>
+        </label>
+        <textarea id="pm-dedi" placeholder="Escribe aquí el mensaje que acompañará al regalo..." rows="4"></textarea>
+        <div class="pm-counter" id="pm-dedi-counter">0 / 100 palabras</div>
+      </div>
+
+      <div class="pm-actions">
+        <button class="pm-btn pm-btn-cart" id="pm-add">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+          Añadir al carrito
+        </button>
+        <a class="pm-btn pm-btn-reserve" id="pm-reserve" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+          Reservar ya
+        </a>
+      </div>
+
+      <p class="pm-note">
+        Al reservar te conectamos por WhatsApp con una de nuestras floristas para confirmar disponibilidad, dedicatoria y entrega.
+      </p>
+      <div class="pm-warning" id="pm-warning"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ============ WHATSAPP FLOAT ============ -->
+<a href="https://wa.me/51954304366?text=Hola%20Zarah's%2C%20quisiera%20hacer%20una%20consulta" target="_blank" rel="noopener" class="wa-float" aria-label="Consultas por WhatsApp">
+  <span class="wa-bubble">
+    <span class="wa-title">Consultas aquí</span>
+    <span class="wa-num">+51 954 304 366</span>
+  </span>
+  <span class="wa-icon">
+    <svg width="30" height="30" viewBox="0 0 32 32" fill="currentColor">
+      <path d="M16.003 3C9.374 3 3.995 8.379 3.995 15.008c0 2.358.687 4.65 1.99 6.626L4 29l7.55-1.96a12.06 12.06 0 0 0 4.453.84h.005c6.628 0 12.007-5.379 12.007-12.008C28.015 8.379 22.636 3 16.003 3zm0 21.882h-.004a9.882 9.882 0 0 1-5.04-1.382l-.36-.214-4.48 1.164 1.196-4.366-.234-.376a9.84 9.84 0 0 1-1.508-5.252c0-5.45 4.44-9.882 9.892-9.882 2.642 0 5.124 1.03 6.992 2.9a9.808 9.808 0 0 1 2.892 6.99c-.002 5.45-4.44 9.882-9.346 9.882zm5.42-7.396c-.296-.148-1.756-.866-2.028-.964-.272-.1-.47-.148-.668.148-.198.296-.766.964-.94 1.162-.174.198-.346.222-.642.074-.296-.148-1.252-.462-2.386-1.474-.882-.786-1.476-1.756-1.65-2.052-.174-.296-.018-.456.13-.604.134-.132.296-.346.444-.52.148-.174.198-.296.296-.494.1-.198.05-.372-.024-.52-.074-.148-.668-1.612-.916-2.206-.24-.578-.486-.5-.668-.51l-.57-.01a1.09 1.09 0 0 0-.792.372c-.272.296-1.04 1.016-1.04 2.478 0 1.462 1.066 2.874 1.214 3.072.148.198 2.096 3.2 5.078 4.488.71.306 1.264.488 1.696.626.712.226 1.36.194 1.872.118.572-.086 1.756-.718 2.004-1.412.248-.694.248-1.288.174-1.412-.074-.124-.272-.198-.568-.346z"/>
+    </svg>
+  </span>
+</a>
+
+<script src="products-data.js"></script>
+<script src="products-app.js"></script>
+</body>
+</html>

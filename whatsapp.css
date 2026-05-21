@@ -1,0 +1,85 @@
+/* WhatsApp floating button */
+.wa-float {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  z-index: 90;
+  display: flex; align-items: center; gap: 14px;
+  text-decoration: none;
+  transition: transform .25s ease;
+}
+.wa-float:hover { transform: translateY(-2px); }
+.wa-bubble {
+  background: white;
+  color: #1f1a16;
+  padding: 12px 18px;
+  border-radius: 16px;
+  box-shadow: 0 14px 40px -10px rgba(0,0,0,0.25);
+  display: flex; flex-direction: column;
+  line-height: 1.2;
+  position: relative;
+  transform: translateX(20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .35s cubic-bezier(.2,.7,.2,1), opacity .35s ease;
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+.wa-bubble::after {
+  content: "";
+  position: absolute;
+  right: -8px; top: 50%; transform: translateY(-50%);
+  border: 8px solid transparent;
+  border-left-color: white;
+  border-right: 0;
+}
+.wa-float:hover .wa-bubble,
+.wa-float:focus-visible .wa-bubble {
+  transform: translateX(0);
+  opacity: 1;
+}
+.wa-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: #4a3f36;
+  font-weight: 500;
+}
+.wa-num {
+  font-size: 16px;
+  font-weight: 600;
+  color: #25D366;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+.wa-icon {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: #25D366;
+  color: white;
+  display: grid; place-items: center;
+  box-shadow: 0 14px 40px -8px rgba(37, 211, 102, 0.55);
+  position: relative;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.wa-float:hover .wa-icon {
+  transform: scale(1.06);
+  box-shadow: 0 18px 50px -8px rgba(37, 211, 102, 0.7);
+}
+.wa-icon::before, .wa-icon::after {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 2px solid #25D366;
+  animation: wa-pulse 2s ease-out infinite;
+}
+.wa-icon::after { animation-delay: 1s; }
+@keyframes wa-pulse {
+  0% { transform: scale(1); opacity: .6; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* On mobile, hide bubble, keep icon */
+@media (max-width: 700px) {
+  .wa-bubble { display: none; }
+  .wa-float { bottom: 18px; right: 18px; }
+  .wa-icon { width: 56px; height: 56px; }
+}
