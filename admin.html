@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="admin-views.css">
+<link rel="stylesheet" href="mobile.css">
 </head>
 <body>
 
@@ -48,19 +50,19 @@
     <div class="sb-tag">Panel Administrativo</div>
 
     <nav class="sb-nav">
-      <div class="item active">
+      <div class="item active" data-view="productos">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         <span>Productos</span>
       </div>
-      <div class="item">
+      <div class="item" data-view="ventas">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg>
         <span>Ventas</span>
       </div>
-      <div class="item">
+      <div class="item" data-view="clientes">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>
         <span>Clientes</span>
       </div>
-      <div class="item">
+      <div class="item" data-view="ajustes">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>Ajustes</span>
       </div>
@@ -80,6 +82,8 @@
 
   <!-- Main -->
   <main class="main">
+    <!-- ====== VIEW: PRODUCTOS ====== -->
+    <section class="view" data-view="productos">
     <div class="main-head">
       <div>
         <h2>Catálogo de <em>productos</em></h2>
@@ -145,13 +149,206 @@
         <div class="col-img">Foto</div>
         <div class="col-name">Nombre</div>
         <div class="col-cat">Categoría</div>
-        <div class="col-price">Precio (S/)</div>
-        <div class="col-old">Precio antes</div>
+        <div class="col-price">Precio</div>
+        <div class="col-old">Antes</div>
         <div class="col-of">Oferta</div>
+        <div class="col-feat">Caract.</div>
         <div></div>
       </div>
       <div id="tableBody"></div>
     </div>
+    </section>
+
+    <!-- ====== VIEW: VENTAS ====== -->
+    <section class="view" data-view="ventas" style="display:none">
+      <div class="main-head">
+        <div>
+          <h2>Historial de <em>ventas</em></h2>
+          <p>Registro de pedidos enviados por WhatsApp y ventas manuales. Marca como completadas cuando hayan sido entregadas.</p>
+        </div>
+        <button class="btn-new" id="btnNewSale">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Registrar venta
+        </button>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="ic">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg>
+          </div>
+          <div class="lbl">Total pedidos</div>
+          <div class="val" id="salesTotal">0</div>
+        </div>
+        <div class="stat">
+          <div class="ic" style="background:rgba(255, 180, 50, 0.15); color:#c08530">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="lbl">Pendientes</div>
+          <div class="val" id="salesPending">0</div>
+        </div>
+        <div class="stat">
+          <div class="ic" style="background:rgba(76, 167, 122, 0.18); color:#3d7d5a">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="lbl">Completadas</div>
+          <div class="val" id="salesDone">0</div>
+        </div>
+        <div class="stat">
+          <div class="ic" style="background:rgba(184,81,58,0.12); color:var(--accent)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="lbl">Ingresos totales</div>
+          <div class="val">S/<span id="salesRevenue">0</span></div>
+        </div>
+      </div>
+
+      <div class="sales-list" id="salesList"></div>
+    </section>
+
+    <!-- ====== VIEW: CLIENTES ====== -->
+    <section class="view" data-view="clientes" style="display:none">
+      <div class="main-head">
+        <div>
+          <h2>Tus <em>clientes</em></h2>
+          <p>Guarda los datos de contacto de tus compradores frecuentes y consulta sus pedidos rápidamente.</p>
+        </div>
+        <button class="btn-new" id="btnNewClient">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Nuevo cliente
+        </button>
+      </div>
+
+      <div class="clients-grid" id="clientsGrid"></div>
+    </section>
+
+    <!-- ====== VIEW: AJUSTES ====== -->
+    <section class="view" data-view="ajustes" style="display:none">
+      <div class="main-head">
+        <div>
+          <h2>Ajustes <em>del sitio</em></h2>
+          <p>Personaliza la apariencia, los datos de contacto y la seguridad del panel.</p>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <!-- Tema -->
+        <div class="settings-card">
+          <div class="settings-card-head">
+            <h3>Tema de apariencia</h3>
+            <p>Elige cómo se verá el panel administrativo.</p>
+          </div>
+          <div class="theme-options">
+            <label class="theme-opt" data-theme="light">
+              <input type="radio" name="theme" value="light">
+              <div class="theme-preview light">
+                <div class="tp-bar"></div>
+                <div class="tp-card"></div>
+                <div class="tp-card sm"></div>
+              </div>
+              <div class="theme-label">Claro <span>(por defecto)</span></div>
+            </label>
+            <label class="theme-opt" data-theme="dark">
+              <input type="radio" name="theme" value="dark">
+              <div class="theme-preview dark">
+                <div class="tp-bar"></div>
+                <div class="tp-card"></div>
+                <div class="tp-card sm"></div>
+              </div>
+              <div class="theme-label">Oscuro</div>
+            </label>
+            <label class="theme-opt" data-theme="rose">
+              <input type="radio" name="theme" value="rose">
+              <div class="theme-preview rose">
+                <div class="tp-bar"></div>
+                <div class="tp-card"></div>
+                <div class="tp-card sm"></div>
+              </div>
+              <div class="theme-label">Rosa pastel</div>
+            </label>
+          </div>
+
+          <div class="settings-card-head" style="margin-top:24px">
+            <h3>Color de marca</h3>
+            <p>Acento aplicado en botones, chips y resaltados.</p>
+          </div>
+          <div class="accent-swatches" id="accentSwatches">
+            <button class="acc-sw" data-color="#c75a87" style="background:#c75a87" title="Rosa"></button>
+            <button class="acc-sw" data-color="#b8513a" style="background:#b8513a" title="Terracota"></button>
+            <button class="acc-sw" data-color="#6b7a5a" style="background:#6b7a5a" title="Salvia"></button>
+            <button class="acc-sw" data-color="#c89b5c" style="background:#c89b5c" title="Dorado"></button>
+            <button class="acc-sw" data-color="#5a73a8" style="background:#5a73a8" title="Azul"></button>
+            <button class="acc-sw" data-color="#8a3724" style="background:#8a3724" title="Vino"></button>
+          </div>
+        </div>
+
+        <!-- Tienda -->
+        <div class="settings-card">
+          <div class="settings-card-head">
+            <h3>Información de la tienda</h3>
+            <p>Estos datos aparecen en los mensajes de WhatsApp y el sitio web.</p>
+          </div>
+          <label>Nombre de la tienda</label>
+          <input type="text" id="setStoreName" placeholder="Zarah's">
+
+          <label>Número de WhatsApp</label>
+          <input type="tel" id="setWhatsapp" placeholder="51994684237">
+          <div class="settings-hint">Solo dígitos, incluye código de país (51 para Perú).</div>
+
+          <label>Horario de atención</label>
+          <input type="text" id="setHours" placeholder="Lun – Sáb · 9:00 a.m. – 6:00 p.m.">
+
+          <label>Zona de entrega</label>
+          <input type="text" id="setArea" placeholder="Callao y Lima">
+
+          <button class="settings-save" id="saveStoreInfo">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4 10-10"/></svg>
+            Guardar cambios
+          </button>
+        </div>
+
+        <!-- Seguridad -->
+        <div class="settings-card">
+          <div class="settings-card-head">
+            <h3>Seguridad</h3>
+            <p>Cambia tu contraseña de administrador. Se aplicará en el próximo inicio de sesión.</p>
+          </div>
+          <label>Contraseña actual</label>
+          <input type="password" id="setPassOld" placeholder="••••••••" autocomplete="current-password">
+          <label>Nueva contraseña</label>
+          <input type="password" id="setPassNew" placeholder="••••••••" autocomplete="new-password">
+          <label>Confirmar nueva contraseña</label>
+          <input type="password" id="setPassConfirm" placeholder="••••••••" autocomplete="new-password">
+          <div class="settings-hint" id="passHint"></div>
+          <button class="settings-save" id="savePass">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Actualizar contraseña
+          </button>
+        </div>
+
+        <!-- Datos -->
+        <div class="settings-card danger">
+          <div class="settings-card-head">
+            <h3>Datos del catálogo</h3>
+            <p>Restablece o exporta todos los datos almacenados localmente.</p>
+          </div>
+          <div class="settings-row">
+            <div>
+              <strong>Exportar respaldo</strong>
+              <div class="settings-hint">Descarga un archivo .json con todos los productos.</div>
+            </div>
+            <button class="settings-btn-secondary" id="btnExport">Descargar</button>
+          </div>
+          <div class="settings-row">
+            <div>
+              <strong>Restablecer catálogo</strong>
+              <div class="settings-hint">Vuelve a los productos originales (se pierden tus cambios).</div>
+            </div>
+            <button class="settings-btn-danger" id="btnReset">Restablecer</button>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -188,6 +385,33 @@
       <button class="btn-secondary" data-close>Cancelar</button>
       <button class="btn-primary" id="imageSave">
         Guardar
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4 10-10"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FEATURES MODAL ============ -->
+<div class="modal-overlay" id="featuresModal">
+  <div class="modal">
+    <button class="modal-close" data-close aria-label="Cerrar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <h3>Características <em>del arreglo</em></h3>
+    <p class="sub">Añade los detalles que verá el cliente. Cada línea aparece con guion "—" y en mayúsculas en la página del producto.</p>
+    <div class="feat-product-name" id="featProductName"></div>
+
+    <div class="feat-list" id="featList"></div>
+
+    <button class="feat-add-btn" id="featAddBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Añadir característica
+    </button>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" data-close>Cancelar</button>
+      <button class="btn-primary" id="featSave">
+        Guardar características
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4 10-10"/></svg>
       </button>
     </div>

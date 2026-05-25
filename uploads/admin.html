@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel de Administración · Zarah's</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div class="login-shell" id="loginShell" style="display:none">
+  <div class="login-card">
+    <a class="back" href="Landing.html" title="Volver al sitio">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>
+    </a>
+    <div class="login-mark">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h1>Panel <em>Zarah's</em></h1>
+    <p class="sub">Acceso exclusivo para administradores. Ingresa tu contraseña para gestionar fotos, precios y catálogo completo.</p>
+
+    <label for="loginPass">Contraseña</label>
+    <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+    <div class="err"></div>
+
+    <button class="submit" id="loginSubmit">
+      Entrar al panel
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    </button>
+
+    <div class="hint">Demo: <code>zarah2025</code></div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app-shell" id="appShell" style="display:none">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <span class="sb-brand-mark">Zh</span>
+      Zarah's
+    </div>
+    <div class="sb-tag">Panel Administrativo</div>
+
+    <nav class="sb-nav">
+      <div class="item active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Productos</span>
+      </div>
+      <div class="item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg>
+        <span>Ventas</span>
+      </div>
+      <div class="item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>
+        <span>Clientes</span>
+      </div>
+      <div class="item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Ajustes</span>
+      </div>
+    </nav>
+
+    <div class="sb-footer">
+      <a href="Productos.html" class="sb-store" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Ver la tienda
+      </a>
+      <button class="sb-logout" id="logoutBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="main-head">
+      <div>
+        <h2>Catálogo de <em>productos</em></h2>
+        <p>Gestiona todas las fotos, precios y ofertas de tu tienda. Los cambios se guardan automáticamente.</p>
+      </div>
+      <button class="btn-new" id="btnNew">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Añadir producto
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="ic">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <div class="lbl">Total productos</div>
+        <div class="val" id="statTotal">0</div>
+      </div>
+      <div class="stat">
+        <div class="ic" style="background:rgba(216,58,122,0.12); color:var(--pink)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        </div>
+        <div class="lbl">En oferta</div>
+        <div class="val" id="statOferta">0</div>
+      </div>
+      <div class="stat">
+        <div class="ic" style="background:rgba(184,81,58,0.12); color:var(--accent)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="lbl">Precio promedio</div>
+        <div class="val">S/<span id="statAvg">0</span></div>
+      </div>
+      <div class="stat">
+        <div class="ic" style="background:rgba(107,122,90,0.18); color:var(--sage)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg>
+        </div>
+        <div class="lbl">Categorías</div>
+        <div class="val" id="statCats">0</div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" placeholder="Buscar por nombre...">
+      </div>
+      <select class="tool-select" id="filterSelect"></select>
+      <select class="tool-select" id="sortSelect">
+        <option value="default">Orden: por defecto</option>
+        <option value="name">Nombre A–Z</option>
+        <option value="price-asc">Precio: menor</option>
+        <option value="price-desc">Precio: mayor</option>
+        <option value="oferta">En oferta primero</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-head">
+        <div class="col-img">Foto</div>
+        <div class="col-name">Nombre</div>
+        <div class="col-cat">Categoría</div>
+        <div class="col-price">Precio (S/)</div>
+        <div class="col-old">Precio antes</div>
+        <div class="col-of">Oferta</div>
+        <div></div>
+      </div>
+      <div id="tableBody"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ IMAGE MODAL ============ -->
+<div class="modal-overlay" id="imageModal">
+  <div class="modal">
+    <button class="modal-close" data-close aria-label="Cerrar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <h3>Cambiar <em>imagen</em></h3>
+    <p class="sub">Sube una foto desde tu dispositivo o pega la URL de una imagen.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="upload">Subir archivo</button>
+      <button class="tab-btn" data-tab="url">Desde URL</button>
+    </div>
+
+    <div class="tab-panel active" data-panel="upload">
+      <div class="upload-zone" id="uploadZone">
+        <div class="icon">📷</div>
+        <div class="t">Arrastra una imagen o haz clic</div>
+        <div class="d">JPG, PNG o WebP · máx. 5MB</div>
+        <input type="file" id="fileInput" accept="image/*" hidden>
+      </div>
+      <div class="upload-preview"></div>
+    </div>
+
+    <div class="tab-panel" data-panel="url">
+      <label for="urlInput">URL de la imagen</label>
+      <input type="url" id="urlInput" placeholder="https://...">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" data-close>Cancelar</button>
+      <button class="btn-primary" id="imageSave">
+        Guardar
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4 10-10"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="products-data.js"></script>
+<script src="admin-app.js"></script>
+</body>
+</html>

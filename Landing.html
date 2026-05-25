@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="styles-2.css">
 <link rel="stylesheet" href="contact.css">
 <link rel="stylesheet" href="whatsapp.css">
+<link rel="stylesheet" href="mobile.css">
 </head>
 <body>
 
@@ -116,7 +117,22 @@
     Ver Arreglos ahora
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
   </a>
+  <button class="nav-burger" id="navBurger" aria-label="Menú">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
 </nav>
+
+<!-- Mobile menu -->
+<div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Cerrar">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <a href="#prod">Más vendidos</a>
+  <a href="#dedi">Dedicatoria</a>
+  <a href="#contact">Contacto</a>
+  <a href="Productos.html" class="cta-mobile">Ver Arreglos ahora</a>
+</div>
 
 <!-- ============ HERO ============ -->
 <section class="hero">
@@ -145,16 +161,16 @@
     </div>
     <div class="hero-meta">
       <div>
-        <div class="stat-num">12k+</div>
-        <div class="stat-lbl">Regalos enviados</div>
-      </div>
-      <div>
-        <div class="stat-num">4.9<span style="font-size:18px;color:var(--gold)">★</span></div>
-        <div class="stat-lbl">Reseñas Google</div>
+        <div class="stat-num">100<span style="font-size:24px">%</span></div>
+        <div class="stat-lbl">Hecho a mano</div>
       </div>
       <div>
         <div class="stat-num">24h</div>
         <div class="stat-lbl">Entrega exprés</div>
+      </div>
+      <div>
+        <div class="stat-num" style="font-size:22px; line-height:1.2">Yape · Plin<br>Transferencia</div>
+        <div class="stat-lbl">Pago fácil</div>
       </div>
     </div>
   </div>
@@ -162,23 +178,23 @@
   <!-- Mosaic -->
   <div class="mosaic">
     <div class="tile t1">
-      <img src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=900&q=80" alt="Ramo de rosas rojas">
-      <span class="tile-tag">Rosas Premium</span>
+      <img src="hero/gatito.jpg" alt="Adorno con gatito blanco y globo rosa">
+      <span class="tile-tag">Detalle gatito</span>
     </div>
     <div class="tile t2">
-      <img src="https://images.unsplash.com/photo-1502239608882-93b729c6af43?w=700&q=80" alt="Caja de regalo dorada">
-      <span class="tile-price">$48</span>
+      <img src="hero/koala.jpg" alt="Canasta con koala y globo Happy Birthday">
+      <span class="tile-tag">Cumpleaños</span>
     </div>
     <div class="tile t3">
-      <img src="https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=700&q=80" alt="Adorno con tarjeta">
+      <img src="hero/conejo.jpg" alt="Adorno con conejo y globo confetti">
       <span class="tile-tag">Hecho a mano</span>
     </div>
     <div class="tile t4">
-      <img src="https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=800&q=80" alt="Ramo pastel">
+      <img src="hero/pooh.jpg" alt="Adorno con Winnie Pooh y rosas pastel">
       <span class="tile-tag">Edición Aurora</span>
     </div>
     <div class="tile t5">
-      <img src="https://images.unsplash.com/photo-1549890762-0a3f8933bc76?w=500&q=80" alt="Detalle floral">
+      <img src="hero/kitty.jpg" alt="Florero rojo con Hello Kitty y rosas">
     </div>
   </div>
 </section>
@@ -234,7 +250,7 @@
       </div>
     </a>
     <a class="cat reveal" href="Productos.html">
-      <img src="https://images.unsplash.com/photo-1591267990532-e5bdb1b0ceb8?w=700&q=80" alt="">
+      <img src="https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=700&q=80" alt="Girasol artesanal">
       <div class="cat-overlay">
         <span class="num">— 04</span>
         <h3>Sin motivo<br><em style="font-style:italic;font-family:var(--serif)">"porque sí"</em></h3>
@@ -255,128 +271,80 @@
   </div>
 
   <div class="product-grid">
-    <article class="product reveal">
+    <a class="product reveal" href="Productos.html">
       <div class="product-img">
-        <img src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=700&q=80" alt="">
+        <img src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=700&q=80" alt="">
         <span class="product-badge hot">Más amado</span>
-        <button class="product-fav" aria-label="Favorito">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </button>
-        <div class="product-quick">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
-          Añadir y dedicar
-        </div>
       </div>
       <div class="product-body">
         <div>
           <h3 class="product-name">Rosas de Bohemia</h3>
           <div class="product-cat">24 tallos · Rojo profundo</div>
         </div>
-        <div class="product-price">$58</div>
       </div>
-    </article>
+    </a>
 
-    <article class="product reveal">
+    <a class="product reveal" href="Productos.html">
       <div class="product-img">
-        <img src="https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=700&q=80" alt="">
+        <img src="hero/vinos.png" alt="Botella de vino tinto con caja de regalo roja">
         <span class="product-badge">Nuevo</span>
-        <button class="product-fav" aria-label="Favorito">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </button>
-        <div class="product-quick">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
-          Añadir y dedicar
-        </div>
       </div>
       <div class="product-body">
         <div>
-          <h3 class="product-name">Ramo Aurora</h3>
-          <div class="product-cat">Peonías · Eucalipto</div>
+          <h3 class="product-name">Vinos &amp; Cervezas</h3>
+          <div class="product-cat">Selección premium · Brindis especial</div>
         </div>
-        <div class="product-price">$72</div>
       </div>
-    </article>
+    </a>
 
-    <article class="product reveal">
+    <a class="product reveal" href="Productos.html">
       <div class="product-img">
-        <img src="https://images.unsplash.com/photo-1502239608882-93b729c6af43?w=700&q=80" alt="">
-        <button class="product-fav" aria-label="Favorito">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </button>
-        <div class="product-quick">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
-          Añadir y dedicar
-        </div>
+        <img src="hero/ferrero.jpeg" alt="Caja de chocolates Ferrero Rocher con globos corazón">
       </div>
       <div class="product-body">
         <div>
-          <h3 class="product-name">Caja Dorada</h3>
-          <div class="product-cat">Chocolates · Flores · Vela</div>
+          <h3 class="product-name">Chocolates</h3>
+          <div class="product-cat">Ferrero Rocher · Para enamorar</div>
         </div>
-        <div class="product-price"><s>$95</s>$78</div>
       </div>
-    </article>
+    </a>
 
-    <article class="product reveal">
+    <a class="product reveal" href="Productos.html">
       <div class="product-img">
-        <img src="https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=700&q=80" alt="">
-        <button class="product-fav" aria-label="Favorito">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </button>
-        <div class="product-quick">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
-          Añadir y dedicar
-        </div>
+        <img src="https://images.unsplash.com/photo-1520763185298-1b434c919102?w=700&q=80" alt="">
       </div>
       <div class="product-body">
         <div>
           <h3 class="product-name">Tulipanes Coral</h3>
           <div class="product-cat">30 tallos · Importados</div>
         </div>
-        <div class="product-price">$64</div>
       </div>
-    </article>
+    </a>
 
-    <article class="product reveal">
+    <a class="product reveal" href="Productos.html">
       <div class="product-img">
-        <img src="https://images.unsplash.com/photo-1591267990532-e5bdb1b0ceb8?w=700&q=80" alt="">
+        <img src="https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=700&q=80" alt="">
         <span class="product-badge">Edición limitada</span>
-        <button class="product-fav" aria-label="Favorito">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </button>
-        <div class="product-quick">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
-          Añadir y dedicar
-        </div>
       </div>
       <div class="product-body">
         <div>
-          <h3 class="product-name">Jardín Encantado</h3>
-          <div class="product-cat">Mixto · Jarrón cerámica</div>
+          <h3 class="product-name">Girasol Artesanal</h3>
+          <div class="product-cat">Hecho a mano · Tallo natural</div>
         </div>
-        <div class="product-price">$92</div>
       </div>
-    </article>
+    </a>
 
-    <article class="product reveal">
+    <a class="product reveal" href="Productos.html">
       <div class="product-img">
-        <img src="https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=700&q=80" alt="">
-        <button class="product-fav" aria-label="Favorito">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </button>
-        <div class="product-quick">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
-          Añadir y dedicar
-        </div>
+        <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=700&q=80" alt="">
       </div>
       <div class="product-body">
         <div>
           <h3 class="product-name">Carta &amp; Pétalos</h3>
           <div class="product-cat">Caja · Tarjeta caligrafiada</div>
         </div>
-        <div class="product-price">$42</div>
       </div>
-    </article>
+    </a>
   </div>
 
   <div style="display:flex;justify-content:center;margin-top:60px">
@@ -427,7 +395,7 @@
       <div class="gc-ribbon"></div>
       <div class="gc-inner">
         <div class="gc-content">
-          <div class="gc-mark">Zarah's · Hecho con cariño</div>
+          <div class="gc-mark">Hecho con cariño</div>
           <div class="gc-greet">Para <em>ti,</em><br>siempre.</div>
           <div class="gc-msg">"En cada pétalo guardé una razón más para amarte. Espero que las cuentes despacio."</div>
           <div class="gc-sig">— Andrés</div>
@@ -448,7 +416,7 @@
       <h2>¿Desea un arreglo<br><em>personalizado?</em></h2>
       <p>Cuéntanos qué imaginas — colores, ocasión, presupuesto — y armamos algo único para ti. Respondemos en minutos por WhatsApp.</p>
 
-      <a class="contact-btn" href="https://wa.me/51954304366?text=Hola%20Zarah's%2C%20quisiera%20un%20arreglo%20personalizado" target="_blank" rel="noopener">
+      <a class="contact-btn" href="https://wa.me/51994684237?text=Hola%20Zarah's%2C%20quisiera%20un%20arreglo%20personalizado" target="_blank" rel="noopener">
         <span class="contact-btn-ic">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
             <path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/>
@@ -456,7 +424,7 @@
         </span>
         <span class="contact-btn-text">
           <span class="lbl">Contacta al número</span>
-          <span class="num">+51 954 304 366</span>
+          <span class="num">+51 994 684 237</span>
         </span>
         <svg class="contact-btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
       </a>
@@ -561,10 +529,10 @@
 </footer>
 
 <!-- ============ WHATSAPP FLOAT ============ -->
-<a href="https://wa.me/51954304366?text=Hola%20Zarah's%2C%20quisiera%20hacer%20una%20consulta" target="_blank" rel="noopener" class="wa-float" aria-label="Consultas por WhatsApp">
+<a href="https://wa.me/51994684237?text=Hola%20Zarah's%2C%20quisiera%20hacer%20una%20consulta" target="_blank" rel="noopener" class="wa-float" aria-label="Consultas por WhatsApp">
   <span class="wa-bubble">
     <span class="wa-title">Consultas aquí</span>
-    <span class="wa-num">+51 954 304 366</span>
+    <span class="wa-num">+51 994 684 237</span>
   </span>
   <span class="wa-icon">
     <svg width="30" height="30" viewBox="0 0 32 32" fill="currentColor">
@@ -579,6 +547,16 @@
   window.addEventListener('scroll', () => {
     nav.classList.toggle('scrolled', window.scrollY > 30);
   });
+
+  // Mobile menu
+  const mmenu = document.getElementById('mobileMenu');
+  const movrl = document.getElementById('mobileMenuOverlay');
+  const openM = () => { mmenu.classList.add('open'); movrl.classList.add('open'); };
+  const closeM = () => { mmenu.classList.remove('open'); movrl.classList.remove('open'); };
+  document.getElementById('navBurger').onclick = openM;
+  document.getElementById('mobileMenuClose').onclick = closeM;
+  movrl.onclick = closeM;
+  mmenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeM));
 
   // Reveal on scroll
   const io = new IntersectionObserver((entries) => {

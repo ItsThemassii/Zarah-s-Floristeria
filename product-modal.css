@@ -14,9 +14,10 @@
 .pm {
   background: var(--cream, #faf6ee);
   border-radius: 22px;
-  width: 100%; max-width: 880px;
+  width: 100%; max-width: 1200px;
+  max-height: 90vh;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 0.85fr 1.3fr;
   overflow: hidden;
   position: relative;
   box-shadow: 0 40px 100px -30px rgba(0,0,0,0.5);
@@ -41,6 +42,14 @@
   background: var(--bg-warm, #ebe0cd);
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
+  align-self: stretch;
+  transition: background-size .35s cubic-bezier(.2,.7,.2,1);
+}
+.pm-img.zoom {
+  background-size: 220%;
+  background-position: var(--zx, 50%) var(--zy, 50%);
+  transition: background-position 0s linear;
 }
 .pm-badge {
   position: absolute; top: 18px; left: 18px;
@@ -53,8 +62,22 @@
   font-weight: 600;
 }
 .pm-body {
-  padding: 44px 40px;
+  padding: 50px 56px;
   display: flex; flex-direction: column;
+  overflow-y: auto;
+  max-height: 90vh;
+  /* Scrollbar suave */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(199, 90, 135, 0.35) transparent;
+}
+.pm-body::-webkit-scrollbar { width: 8px; }
+.pm-body::-webkit-scrollbar-track { background: transparent; }
+.pm-body::-webkit-scrollbar-thumb {
+  background: rgba(199, 90, 135, 0.35);
+  border-radius: 999px;
+}
+.pm-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(199, 90, 135, 0.55);
 }
 .pm-cats {
   display: flex; flex-wrap: wrap; gap: 6px;
@@ -97,6 +120,36 @@
   color: var(--pink, #d63a7a);
   font-weight: 600;
   letter-spacing: 0.08em;
+}
+
+/* Features list */
+.pm-features {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 18px 0 0;
+  border-top: 1px solid rgba(31,26,22,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.pm-features:empty { display: none; border: none; margin: 0; padding: 0; }
+.pm-features li {
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--ink, #1f1a16);
+  line-height: 1.5;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.pm-features li::before {
+  content: "—";
+  color: #c75a87;
+  font-weight: 600;
+  flex-shrink: 0;
 }
 .pm-actions {
   margin-top: 24px;
@@ -226,6 +279,11 @@
   font-style: italic;
   padding-top: 16px;
   border-top: 1px solid rgba(31,26,22,0.1);
+}
+.pm-note strong {
+  color: var(--ink, #1f1a16);
+  font-weight: 600;
+  font-style: normal;
 }
 
 @media (max-width: 700px) {

@@ -125,6 +125,7 @@
     renderPagination(totalPages);
     document.getElementById("resultCount").textContent =
       `${list.length} ${list.length === 1 ? "producto" : "productos"}`;
+    applyFavStates();
   }
 
   function renderPagination(total) {
@@ -169,11 +170,7 @@
 
   // ---------- product modal ----------
   const MAX_NAME_CHARS = 25;
-  const MAX_DEDI_WORDS = 100;
-
-  function countWords(s) {
-    return (s.trim().match(/\S+/g) || []).length;
-  }
+  const MAX_DEDI_CHARS = 150;
 
   function updateModalValidation() {
     const nameField = document.getElementById("pm-name-field");
@@ -199,12 +196,12 @@
 
     // Dedicatoria
     const dv = dediInput.value;
-    const dw = countWords(dv);
-    const dover = dw > MAX_DEDI_WORDS;
-    dediCounter.textContent = `${dw} / ${MAX_DEDI_WORDS} palabras`;
+    const dc = dv.length;
+    const dover = dc > MAX_DEDI_CHARS;
+    dediCounter.textContent = `${dc} / ${MAX_DEDI_CHARS}`;
     dediCounter.classList.toggle("over", dover);
     dediInput.classList.toggle("invalid", dover);
-    if (dover) { valid = false; warnings.push(`La dedicatoria tiene ${dw - MAX_DEDI_WORDS} palabras de más.`); }
+    if (dover) { valid = false; warnings.push(`La dedicatoria tiene ${dc - MAX_DEDI_CHARS} caracteres de más.`); }
 
     btnAdd.disabled = !valid;
     btnReserve.classList.toggle("disabled", !valid);
@@ -231,10 +228,12 @@
   }
 
   function buildWhatsappMsg(p, extras) {
-    let msg = `Hola Zarah's, quisiera reservar el producto "${p.name}" (S/ ${Number(p.price).toFixed(2)}).`;
-    if (extras.customName) msg += `\n\nNombre para personalizar: ${extras.customName}`;
-    if (extras.dedi) msg += `\n\nDedicatoria de la tarjeta:\n"${extras.dedi}"`;
-    msg += "\n\n¿Está disponible?";
+    let msg = `¡Hola Zarah's! 🌸\n\nQuisiera reservar el siguiente producto:\n\n`;
+    msg += `*${p.name}*\n`;
+    msg += `   • Precio: S/ ${Number(p.price).toFixed(2)}\n`;
+    if (extras.customName) msg += `   • Personalizar con: "${extras.customName}"\n`;
+    if (extras.dedi) msg += `   • Dedicatoria: "${extras.dedi}"\n`;
+    msg += `\n¿Tienen disponibilidad? Quedo atenta(o) para coordinar la entrega y el pago. ¡Gracias! 💕`;
     return msg;
   }
 
@@ -255,6 +254,11 @@
     saveEl.textContent = sa;
     document.getElementById("pm-badge").style.display = p.badge ? "" : "none";
     document.getElementById("pm-badge").textContent = p.badge || "";
+
+    // Características (lista con "-" en mayúsculas)
+    const featsEl = document.getElementById("pm-features");
+    const feats = Array.isArray(p.features) ? p.features.filter(f => f && f.trim()) : [];
+    featsEl.innerHTML = feats.map(f => `<li>${escapeHTML(f.toUpperCase())}</li>`).join("");
 
     // Reset campos
     document.getElementById("pm-custom-name").value = "";
@@ -279,7 +283,7 @@
       }
       const extras = getModalExtras();
       const msg = encodeURIComponent(buildWhatsappMsg(p, extras));
-      reserveBtn.href = `https://wa.me/51954304366?text=${msg}`;
+      reserveBtn.href = `https://wa.me/51994684237?text=${msg}`;
       // continuar con la navegación normal
     };
 
@@ -296,10 +300,66 @@
     };
 
     m.classList.add("open");
+
+    // Hover-zoom on the image
+    const imgEl = document.getElementById("pm-img");
+    if (imgEl && p.img) {
+      imgEl.onmousemove = (e) => {
+        const r = imgEl.getBoundingClientRect();
+        const x = ((e.clientX - r.left) / r.width) * 100;
+        const y = ((e.clientY - r.top) / r.height) * 100;
+        const lx = e.clientX - r.left;
+        const ly = e.clientY - r.top;
+        imgEl.style.setProperty("--zx", x + "%");
+        imgEl.style.setProperty("--zy", y + "%");
+        imgEl.style.setProperty("--lx", lx + "px");
+        imgEl.style.setProperty("--ly", ly + "px");
+        imgEl.classList.add("zoom");
+      };
+      imgEl.onmouseleave = () => imgEl.classList.remove("zoom");
+    } else if (imgEl) {
+      imgEl.onmousemove = null;
+      imgEl.onmouseleave = null;
+      imgEl.classList.remove("zoom");
+    }
   }
   function closeProductModal() {
     const m = document.getElementById("productModal");
     if (m) m.classList.remove("open");
+  }
+
+  // ---------- favorites ----------
+  const FAV_KEY = "zarah_favorites_v1";
+  function getFavs() {
+    try { return JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); }
+    catch (e) { return []; }
+  }
+  function setFavs(arr) { localStorage.setItem(FAV_KEY, JSON.stringify(arr)); updateFavBadge(); }
+  function toggleFav(id) {
+    const favs = getFavs();
+    const i = favs.indexOf(id);
+    if (i >= 0) favs.splice(i, 1);
+    else favs.push(id);
+    setFavs(favs);
+    // refresh card visual
+    document.querySelectorAll(`.p-card[data-id="${id}"] .p-fav`).forEach(b => {
+      b.classList.toggle("on", favs.includes(id));
+    });
+    return favs.includes(id);
+  }
+  function updateFavBadge() {
+    const total = getFavs().length;
+    const btn = document.getElementById("btnFavs");
+    if (!btn) return;
+    let badge = btn.querySelector(".badge");
+    if (total > 0) {
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.className = "badge";
+        btn.appendChild(badge);
+      }
+      badge.textContent = total;
+    } else if (badge) badge.remove();
   }
 
   // ---------- cart ----------
@@ -314,7 +374,6 @@
     const item = { id: p.id, name: p.name, price: p.price, img: p.img, qty: 1 };
     if (extras && extras.customName) item.customName = extras.customName;
     if (extras && extras.dedi) item.dedi = extras.dedi;
-    // Si hay personalización, lo añadimos como item nuevo (no merge)
     if ((extras && (extras.customName || extras.dedi))) {
       c.push(item);
     } else {
@@ -327,19 +386,230 @@
   function updateCartBadge() {
     const c = getCart();
     const total = c.reduce((s, x) => s + (x.qty || 1), 0);
-    let badge = document.querySelector(".nav-icon .badge");
-    const cartBtn = document.querySelector('[aria-label="Carrito"]');
-    if (!cartBtn) return;
+    const btn = document.getElementById("btnCart");
+    if (!btn) return;
+    let badge = btn.querySelector(".badge");
     if (total > 0) {
       if (!badge) {
         badge = document.createElement("span");
         badge.className = "badge";
-        cartBtn.appendChild(badge);
+        btn.appendChild(badge);
       }
       badge.textContent = total;
-    } else if (badge) {
-      badge.remove();
+    } else if (badge) badge.remove();
+  }
+
+  // ---------- side panel ----------
+  function openSidePanel(kind) {
+    const panel = document.getElementById("sidePanel");
+    const overlay = document.getElementById("sideOverlay");
+    const title = document.getElementById("spTitle");
+    const body = document.getElementById("spBody");
+    const foot = document.getElementById("spFoot");
+    panel.dataset.kind = kind;
+    if (kind === "favs") {
+      title.innerHTML = `Tus <em>favoritos</em>`;
+      foot.classList.remove("show");
+      renderFavs(body);
+    } else {
+      title.innerHTML = `Tu <em>carrito</em>`;
+      renderCart(body, foot);
     }
+    panel.classList.add("open");
+    overlay.classList.add("open");
+  }
+  function closeSidePanel() {
+    document.getElementById("sidePanel").classList.remove("open");
+    document.getElementById("sideOverlay").classList.remove("open");
+  }
+
+  function renderFavs(body) {
+    const favs = getFavs();
+    const items = favs
+      .map(id => state.products.find(p => p.id === id))
+      .filter(Boolean);
+    if (!items.length) {
+      body.innerHTML = `
+        <div class="sp-empty">
+          <div class="ic">♡</div>
+          <div class="t">Sin favoritos aún</div>
+          <div class="d">Toca el corazón en cualquier producto para guardarlo aquí.</div>
+        </div>`;
+      return;
+    }
+    body.innerHTML = "";
+    items.forEach(p => {
+      const el = document.createElement("div");
+      el.className = "sp-item";
+      el.dataset.id = p.id;
+      el.innerHTML = `
+        <div class="si-img" data-action="open" style="background-image:url('${escapeHTML(p.img || "")}')"></div>
+        <div class="si-meta">
+          <div class="si-name">${escapeHTML(p.name)}</div>
+          <div class="si-price">S/ ${Number(p.price).toFixed(2)}</div>
+          <button class="sp-favbtn" data-action="addcart">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+            Añadir al carrito
+          </button>
+        </div>
+        <div class="si-actions">
+          <button class="sp-remove" data-action="rmfav">Quitar</button>
+        </div>
+      `;
+      body.appendChild(el);
+    });
+  }
+
+  function renderCart(body, foot) {
+    const cart = getCart();
+    if (!cart.length) {
+      body.innerHTML = `
+        <div class="sp-empty">
+          <div class="ic">🛒</div>
+          <div class="t">Carrito vacío</div>
+          <div class="d">Añade tus arreglos favoritos y procede a reservarlos por WhatsApp.</div>
+        </div>`;
+      foot.classList.remove("show");
+      return;
+    }
+    body.innerHTML = "";
+    cart.forEach((item, idx) => {
+      const el = document.createElement("div");
+      el.className = "sp-item";
+      el.dataset.idx = idx;
+      const extra = [item.customName && `Para: ${item.customName}`, item.dedi && `"${item.dedi}"`]
+        .filter(Boolean).join(" · ");
+      el.innerHTML = `
+        <div class="si-img" data-action="open" data-id="${item.id}" style="background-image:url('${escapeHTML(item.img || "")}')"></div>
+        <div class="si-meta">
+          <div class="si-name">${escapeHTML(item.name)}</div>
+          <div class="si-price">S/ ${Number(item.price).toFixed(2)}</div>
+          ${extra ? `<div class="si-extra">${escapeHTML(extra)}</div>` : ""}
+        </div>
+        <div class="si-actions">
+          <div class="sp-qty">
+            <button data-action="dec">−</button>
+            <span class="n">${item.qty || 1}</span>
+            <button data-action="inc">+</button>
+          </div>
+          <button class="sp-remove" data-action="rmcart">Quitar</button>
+        </div>
+      `;
+      body.appendChild(el);
+    });
+
+    const total = cart.reduce((s, x) => s + Number(x.price) * (x.qty || 1), 0);
+    foot.innerHTML = `
+      <div class="sp-total">
+        <div class="lbl">Total</div>
+        <div class="val">S/ ${total.toFixed(2)}</div>
+      </div>
+      <a class="sp-checkout" id="spCheckout" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+        Reservar por WhatsApp
+      </a>
+    `;
+    foot.classList.add("show");
+
+    // Build WhatsApp link
+    let msg = "¡Hola Zarah's! 🌸\n\nQuisiera reservar los siguientes productos:\n\n";
+    cart.forEach((it, i) => {
+      const lineTotal = (Number(it.price) * (it.qty || 1)).toFixed(2);
+      msg += `${i + 1}. *${it.name}*\n`;
+      msg += `   • Cantidad: ${it.qty || 1}\n`;
+      msg += `   • Precio unitario: S/ ${Number(it.price).toFixed(2)}\n`;
+      msg += `   • Subtotal: S/ ${lineTotal}\n`;
+      if (it.customName) msg += `   • Personalizar con: "${it.customName}"\n`;
+      if (it.dedi) msg += `   • Dedicatoria: "${it.dedi}"\n`;
+      msg += "\n";
+    });
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `*TOTAL: S/ ${total.toFixed(2)}*\n\n`;
+    msg += `¿Tienen disponibilidad? Quedo atenta(o) para coordinar la entrega y el pago. ¡Gracias! 💕`;
+    document.getElementById("spCheckout").href = `https://wa.me/51994684237?text=${encodeURIComponent(msg)}`;
+  }
+
+  function handleSidePanelClick(e) {
+    const panel = document.getElementById("sidePanel");
+    const kind = panel.dataset.kind;
+    const item = e.target.closest(".sp-item");
+    if (!item) return;
+    const action = e.target.closest("[data-action]")?.dataset.action;
+    if (!action) return;
+
+    if (kind === "favs") {
+      const id = item.dataset.id;
+      const p = state.products.find(x => x.id === id);
+      if (action === "open") {
+        closeSidePanel();
+        if (p) openProductModal(p);
+      } else if (action === "addcart") {
+        if (p) { addToCart(p); toast(`"${p.name}" añadido al carrito`, "success"); }
+      } else if (action === "rmfav") {
+        toggleFav(id);
+        renderFavs(document.getElementById("spBody"));
+      }
+    } else {
+      const idx = parseInt(item.dataset.idx, 10);
+      const cart = getCart();
+      if (action === "open") {
+        const id = e.target.closest("[data-id]")?.dataset.id;
+        const p = state.products.find(x => x.id === id);
+        if (p) { closeSidePanel(); openProductModal(p); }
+      } else if (action === "inc") {
+        cart[idx].qty = (cart[idx].qty || 1) + 1;
+        setCart(cart);
+        renderCart(document.getElementById("spBody"), document.getElementById("spFoot"));
+      } else if (action === "dec") {
+        cart[idx].qty = Math.max(1, (cart[idx].qty || 1) - 1);
+        setCart(cart);
+        renderCart(document.getElementById("spBody"), document.getElementById("spFoot"));
+      } else if (action === "rmcart") {
+        cart.splice(idx, 1);
+        setCart(cart);
+        renderCart(document.getElementById("spBody"), document.getElementById("spFoot"));
+      }
+    }
+  }
+
+  // ---------- search ----------
+  function openSearch() {
+    const overlay = document.getElementById("searchOverlay");
+    overlay.classList.add("open");
+    setTimeout(() => document.getElementById("searchInput").focus(), 200);
+  }
+  function closeSearch() {
+    document.getElementById("searchOverlay").classList.remove("open");
+    document.getElementById("searchInput").value = "";
+    document.getElementById("searchResults").classList.remove("show");
+  }
+  function renderSearchResults(q) {
+    const res = document.getElementById("searchResults");
+    if (!q.trim()) { res.classList.remove("show"); res.innerHTML = ""; return; }
+    const ql = q.toLowerCase();
+    const matches = state.products.filter(p => {
+      if (p.name.toLowerCase().includes(ql)) return true;
+      const cats = (p.cats || []).map(id => (window.CATEGORIES.find(c => c.id === id) || {}).label || "").join(" ").toLowerCase();
+      return cats.includes(ql);
+    }).slice(0, 8);
+    res.classList.add("show");
+    if (!matches.length) {
+      res.innerHTML = `<div class="search-empty">No encontramos resultados para "${escapeHTML(q)}".</div>`;
+      return;
+    }
+    res.innerHTML = matches.map(p => {
+      const cats = (p.cats || []).map(id => (window.CATEGORIES.find(c => c.id === id) || {}).label).filter(Boolean).join(" · ");
+      return `
+        <div class="search-result" data-id="${p.id}">
+          <div class="sr-img" style="background-image:url('${escapeHTML(p.img || "")}')"></div>
+          <div class="sr-meta">
+            <div class="sr-name">${escapeHTML(p.name)}</div>
+            <div class="sr-cats">${escapeHTML(cats)}</div>
+          </div>
+          <div class="sr-price">S/ ${Number(p.price).toFixed(2)}</div>
+        </div>
+      `;
+    }).join("");
   }
 
   // ---------- public actions ----------
@@ -352,11 +622,22 @@
 
     if (e.target.closest(".p-fav")) {
       e.stopPropagation();
-      e.target.closest(".p-fav").classList.toggle("on");
+      const on = toggleFav(id);
+      toast(on ? "Añadido a favoritos" : "Quitado de favoritos");
       return;
     }
     // Cualquier otro click en la card abre el modal con las dos opciones
     openProductModal(p);
+  }
+
+  // Marca corazones llenos en cards al renderizar
+  function applyFavStates() {
+    const favs = new Set(getFavs());
+    document.querySelectorAll(".p-card").forEach(c => {
+      const id = c.dataset.id;
+      const btn = c.querySelector(".p-fav");
+      if (btn) btn.classList.toggle("on", favs.has(id));
+    });
   }
 
   // ---------- init ----------
@@ -365,21 +646,37 @@
     renderChips();
     render();
     updateCartBadge();
+    updateFavBadge();
 
     document.getElementById("sortSelect").addEventListener("change", (e) => {
       state.sort = e.target.value; render();
     });
     document.getElementById("catalog").addEventListener("click", handleCardClick);
 
-    // Product modal close
-    const pm = document.getElementById("productModal");
-    if (pm) {
-      pm.addEventListener("click", (e) => {
-        if (e.target === pm || e.target.closest("[data-close]")) closeProductModal();
-      });
-    }
+    // Nav: search / favs / cart
+    document.getElementById("btnSearch").addEventListener("click", openSearch);
+    document.getElementById("searchClose").addEventListener("click", closeSearch);
+    document.getElementById("searchInput").addEventListener("input", (e) => renderSearchResults(e.target.value));
+    document.getElementById("searchResults").addEventListener("click", (e) => {
+      const r = e.target.closest(".search-result");
+      if (!r) return;
+      const p = state.products.find(x => x.id === r.dataset.id);
+      if (p) { closeSearch(); openProductModal(p); }
+    });
+
+    document.getElementById("btnFavs").addEventListener("click", () => openSidePanel("favs"));
+    document.getElementById("btnCart").addEventListener("click", () => openSidePanel("cart"));
+    document.getElementById("spClose").addEventListener("click", closeSidePanel);
+    document.getElementById("sideOverlay").addEventListener("click", closeSidePanel);
+    document.getElementById("spBody").addEventListener("click", handleSidePanelClick);
+
+    // Esc cierra cualquier panel/modal
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeProductModal();
+      if (e.key === "Escape") {
+        closeProductModal();
+        closeSidePanel();
+        closeSearch();
+      }
     });
 
     // Re-render si otro tab (admin) cambia productos
@@ -389,6 +686,15 @@
         render();
       }
       if (e.key === CART_KEY) updateCartBadge();
+      if (e.key === FAV_KEY) { updateFavBadge(); applyFavStates(); }
     });
+
+    // Re-attach product modal close
+    const pm = document.getElementById("productModal");
+    if (pm) {
+      pm.addEventListener("click", (e) => {
+        if (e.target === pm || e.target.closest("[data-close]")) closeProductModal();
+      });
+    }
   });
 })();
