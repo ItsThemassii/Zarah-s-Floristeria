@@ -551,6 +551,16 @@ input, select { font-family: inherit; }
 }
 
 /* Categories popover */
+.cats-pop {
+  position: absolute;
+  z-index: 90;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px -10px rgba(31, 26, 22, 0.25), 0 0 0 1px var(--line);
+  width: 240px;
+  padding: 8px;
+  animation: pop-in .18s ease;
+}
 @keyframes pop-in {
   from { opacity: 0; transform: translateY(-4px); }
 }
