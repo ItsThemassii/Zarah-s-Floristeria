@@ -257,8 +257,10 @@
 
     // Características (lista con "-" en mayúsculas)
     const featsEl = document.getElementById("pm-features");
+    const featsWrap = document.getElementById("pm-features-wrap");
     const feats = Array.isArray(p.features) ? p.features.filter(f => f && f.trim()) : [];
     featsEl.innerHTML = feats.map(f => `<li>${escapeHTML(f.toUpperCase())}</li>`).join("");
+    if (featsWrap) featsWrap.style.display = feats.length ? "" : "none";
 
     // Reset campos
     document.getElementById("pm-custom-name").value = "";
