@@ -590,12 +590,42 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     `;
-    row.querySelector("input").value = value;
+    const input = row.querySelector("input");
+    input.value = value;
     row.querySelector(".feat-row-del").onclick = () => {
       row.remove();
       if (document.querySelectorAll("#featList .feat-row").length === 0) addFeatRow("");
     };
+    // Enter → si está vacío, guarda; si tiene texto, salta a la siguiente fila (o crea una nueva)
+    input.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      const allRows = Array.from(document.querySelectorAll("#featList .feat-row"));
+      const idx = allRows.indexOf(row);
+      const isLast = idx === allRows.length - 1;
+      if (!input.value.trim() && allRows.length > 1) {
+        // Enter en una fila vacía → guarda todo
+        saveFeatures();
+        return;
+      }
+      if (isLast) {
+        // Última fila con contenido → crea una nueva y enfoca
+        if (input.value.trim()) {
+          addFeatRow("");
+          const newInput = document.querySelector("#featList .feat-row:last-child input");
+          if (newInput) newInput.focus();
+        } else {
+          // Última fila vacía → guarda
+          saveFeatures();
+        }
+      } else {
+        // Salta a la siguiente fila
+        const next = allRows[idx + 1].querySelector("input");
+        if (next) next.focus();
+      }
+    });
     list.appendChild(row);
+    return input;
   }
   function saveFeatures() {
     const id = state.editingId;
