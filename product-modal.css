@@ -302,11 +302,11 @@
 @media (max-width: 700px) {
   .pm {
     grid-template-columns: 1fr;
-    max-height: 90vh;
+    max-height: 100vh;
     overflow-y: auto;
   }
   .pm-img { aspect-ratio: 4/3; }
-  .pm-body { padding: 28px 24px; }
-  .pm-name { font-size: 28px; }
-  .pm-price { font-size: 26px; }
+  .pm-body { padding: 24px 20px; }
+  .pm-name { font-size: 26px; }
+  .pm-price { font-size: 24px; }
 }

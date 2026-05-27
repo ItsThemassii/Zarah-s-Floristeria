@@ -39,8 +39,65 @@
 
 <!-- ============ APP ============ -->
 <div class="app-shell" id="appShell" style="display:none">
-  <!-- Sidebar -->
-  <aside class="sidebar">
+
+  <!-- Mobile top bar (hamburger + brand) — hidden on desktop -->
+  <header class="admin-topbar" id="adminTopbar">
+    <button class="topbar-burger" id="adminBurger" aria-label="Abrir menú">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <div class="topbar-brand">
+      <span class="sb-brand-mark">Zh</span>
+      Zarah's
+    </div>
+  </header>
+
+  <!-- Mobile drawer overlay -->
+  <div class="admin-drawer-overlay" id="adminDrawerOverlay"></div>
+
+  <!-- Mobile drawer (slides from left, like YouTube) -->
+  <nav class="admin-drawer" id="adminDrawer">
+    <div class="drawer-head">
+      <div class="drawer-brand">
+        <span class="sb-brand-mark">Zh</span>
+        Zarah's
+      </div>
+      <button class="drawer-close" id="adminDrawerClose" aria-label="Cerrar menú">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-tag">Panel Administrativo</div>
+    <div class="drawer-nav">
+      <div class="drawer-item active" data-view="productos">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Productos</span>
+      </div>
+      <div class="drawer-item" data-view="ventas">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg>
+        <span>Ventas</span>
+      </div>
+      <div class="drawer-item" data-view="clientes">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>
+        <span>Clientes</span>
+      </div>
+      <div class="drawer-item" data-view="ajustes">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Ajustes</span>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <a href="Productos.html" class="drawer-link" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Ver la tienda
+      </a>
+      <button class="drawer-link drawer-logout" id="drawerLogoutBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </nav>
+
+  <!-- Sidebar (desktop only) -->
+  <aside class="sidebar" id="desktopSidebar">
     <div class="sb-brand">
       <span class="sb-brand-mark">Zh</span>
       Zarah's
@@ -154,6 +211,10 @@
         <div></div>
       </div>
       <div id="tableBody"></div>
+    </div>
+    <div class="table-scroll-hint" aria-hidden="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      Desliza para ver todo el catálogo
     </div>
     </section>
 
@@ -420,5 +481,48 @@
 
 <script src="products-data.js"></script>
 <script src="admin-app.js"></script>
+<script>
+(function(){
+  var burger   = document.getElementById('adminBurger');
+  var drawer   = document.getElementById('adminDrawer');
+  var overlay  = document.getElementById('adminDrawerOverlay');
+  var closeBtn = document.getElementById('adminDrawerClose');
+
+  function openDrawer()  { drawer.classList.add('open'); overlay.classList.add('open'); }
+  function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('open'); }
+
+  burger.onclick   = openDrawer;
+  closeBtn.onclick = closeDrawer;
+  overlay.onclick  = closeDrawer;
+
+  // Drawer nav items → click matching desktop sidebar item + close drawer
+  drawer.querySelectorAll('.drawer-item').forEach(function(item) {
+    item.onclick = function() {
+      var v = item.dataset.view;
+      // Update drawer active state
+      drawer.querySelectorAll('.drawer-item').forEach(function(i) { i.classList.toggle('active', i === item); });
+      // Click the matching desktop sidebar item (triggers admin-app.js switchView)
+      var match = document.querySelector('.sb-nav .item[data-view="' + v + '"]');
+      if (match) match.click();
+      closeDrawer();
+    };
+  });
+
+  // Keep drawer in sync when desktop sidebar is clicked
+  document.querySelectorAll('.sb-nav .item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      var v = item.dataset.view;
+      drawer.querySelectorAll('.drawer-item').forEach(function(i) { i.classList.toggle('active', i.dataset.view === v); });
+    });
+  });
+
+  // Drawer logout
+  var drawerLogout = document.getElementById('drawerLogoutBtn');
+  var mainLogout   = document.getElementById('logoutBtn');
+  if (drawerLogout && mainLogout) {
+    drawerLogout.onclick = function() { closeDrawer(); mainLogout.click(); };
+  }
+})();
+</script>
 </body>
 </html>

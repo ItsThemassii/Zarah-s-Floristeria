@@ -816,20 +816,4 @@ input, select { font-family: inherit; }
 .toast.show { opacity: 1; transform: translateY(0); }
 .toast.success { background: #2d5d3d; }
 
-/* Responsive */
-@media (max-width: 980px) {
-  .app-shell { grid-template-columns: 1fr; }
-  .sidebar { position: static; height: auto; flex-direction: row; align-items: center; padding: 14px 20px; flex-wrap: wrap; }
-  .sb-tag, .sb-footer { display: none; }
-  .sb-brand { margin-bottom: 0; }
-  .sb-nav { flex-direction: row; flex: 1; justify-content: flex-end; gap: 8px; }
-  .sb-nav .item span { display: none; }
-  .stats { grid-template-columns: repeat(2, 1fr); }
-  .main { padding: 24px; }
-}
-@media (max-width: 700px) {
-  .table-head, .row { grid-template-columns: 60px 1.4fr 100px 60px; gap: 10px; padding: 12px 14px; }
-  .table-head .col-cat, .row .cat-select, .row .cat-picker,
-  .table-head .col-old, .row .old-input,
-  .table-head .col-of, .row .toggle { display: none; }
-}
+/* Responsive — handled by mobile.css drawer system */
