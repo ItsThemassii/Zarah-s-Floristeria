@@ -350,7 +350,14 @@
     return favs.includes(id);
   }
   function updateFavBadge() {
-    const total = getFavs().length;
+    // Only count favorites that still match an existing product
+    const validIds = new Set(state.products.map(p => p.id));
+    const favs = getFavs().filter(id => validIds.has(id));
+    // Clean up stale IDs in localStorage if any were removed
+    if (favs.length !== getFavs().length) {
+      localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+    }
+    const total = favs.length;
     const btn = document.getElementById("btnFavs");
     if (!btn) return;
     let badge = btn.querySelector(".badge");
@@ -386,8 +393,12 @@
     setCart(c);
   }
   function updateCartBadge() {
-    const c = getCart();
-    const total = c.reduce((s, x) => s + (x.qty || 1), 0);
+    const validIds = new Set(state.products.map(p => p.id));
+    const cleaned = getCart().filter(x => validIds.has(x.id));
+    if (cleaned.length !== getCart().length) {
+      localStorage.setItem(CART_KEY, JSON.stringify(cleaned));
+    }
+    const total = cleaned.reduce((s, x) => s + (x.qty || 1), 0);
     const btn = document.getElementById("btnCart");
     if (!btn) return;
     let badge = btn.querySelector(".badge");
