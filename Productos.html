@@ -207,6 +207,10 @@
     </button>
     <div class="pm-img" id="pm-img">
       <span class="pm-badge" id="pm-badge"></span>
+      <button class="pm-view-image" id="pm-view-image" type="button" aria-label="Ver imagen completa">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span>Ver imagen</span>
+      </button>
     </div>
     <div class="pm-body">
       <div class="pm-cats" id="pm-cats"></div>
@@ -259,6 +263,15 @@
   </div>
 </div>
 
+<!-- ============ FULLSCREEN IMAGE VIEWER (mobile) ============ -->
+<div class="img-viewer" id="imgViewer" aria-hidden="true">
+  <button class="img-viewer-close" id="imgViewerClose" aria-label="Cerrar">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <div class="img-viewer-img" id="imgViewerImg"></div>
+  <div class="img-viewer-hint">Pellizca para hacer zoom</div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -286,6 +299,32 @@
   document.getElementById('mobileMenuClose').onclick = closeMobileMenu;
   movrl.onclick = closeMobileMenu;
   mmenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMobileMenu));
+
+  // Fullscreen image viewer (mobile)
+  (function () {
+    const viewer = document.getElementById('imgViewer');
+    const viewerImg = document.getElementById('imgViewerImg');
+    const viewerClose = document.getElementById('imgViewerClose');
+    const viewBtn = document.getElementById('pm-view-image');
+    const pmImg = document.getElementById('pm-img');
+
+    function openViewer() {
+      const bg = pmImg.style.backgroundImage;
+      if (!bg || bg === 'none') return;
+      viewerImg.style.backgroundImage = bg;
+      viewer.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeViewer() {
+      viewer.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    viewBtn.addEventListener('click', (e) => { e.stopPropagation(); openViewer(); });
+    viewerClose.addEventListener('click', closeViewer);
+    viewer.addEventListener('click', (e) => { if (e.target === viewer) closeViewer(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && viewer.classList.contains('open')) closeViewer(); });
+  })();
 </script>
 </body>
 </html>
