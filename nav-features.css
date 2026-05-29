@@ -318,9 +318,9 @@
   transform: translateY(-2px);
 }
 
-@media (max-width: 540px) {
+@media (max-width: 980px) {
   .search-overlay { padding: 16px 18px; }
-  .side-panel { width: 100%; }
+  .side-panel { width: 100% !important; max-width: 100% !important; }
   .sp-head { padding: 18px 20px; }
   .sp-body { padding: 14px; }
   .sp-foot { padding: 18px 20px; }

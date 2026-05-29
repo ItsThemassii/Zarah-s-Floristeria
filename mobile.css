@@ -83,15 +83,25 @@
 
 /* ============ LANDING & PRODUCTOS — mobile ============ */
 @media (max-width: 980px) {
+  /* Prevent horizontal overflow globally */
+  html, body { overflow-x: hidden !important; max-width: 100vw; }
+
   /* Show hamburger, hide links */
   .nav-burger { display: inline-flex; }
   .nav-links { display: none !important; }
 
   /* Trim padding so logo fits */
-  .nav, .nav.scrolled { padding: 14px 18px; }
-  .nav-logo { font-size: 22px; gap: 6px; }
-  .nav-logo svg:first-child { width: 34px; height: 34px; }
-  .word-text { font-size: 22px; }
+  .nav, .nav.scrolled {
+    padding: 14px 16px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .nav-logo { font-size: 20px; gap: 6px; flex-shrink: 0; min-width: 0; }
+  .nav-logo svg:first-child { width: 32px; height: 32px; }
+  .nav-wordmark { padding: 4px 8px 4px 12px; overflow: hidden; }
+  .word-text { font-size: 20px; }
   .flor { display: none; }
   .nav-cta { padding: 10px 14px; font-size: 12px; }
 
@@ -162,32 +172,43 @@
     align-items: stretch;
     gap: 8px;
     margin: 6px 0 6px !important;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   .filter-chips {
     display: flex;
     overflow-x: auto;
+    overflow-y: hidden;
     flex-wrap: nowrap;
     gap: 6px;
     padding-bottom: 4px;
     -webkit-overflow-scrolling: touch;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
   }
   .filter-chips::-webkit-scrollbar { height: 0; }
   .chip { white-space: nowrap; flex-shrink: 0; padding: 8px 14px; font-size: 12px; }
-  .filter-right { width: 100%; justify-content: space-between; }
-  .sort-select { font-size: 12px; padding: 8px 12px; }
+  .filter-right { width: 100%; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .sort-select { font-size: 12px; padding: 8px 12px; flex: 1; min-width: 0; }
   .result-count { font-size: 12px; }
 
   .catalog {
     padding: 0 14px 16px;
-    gap: 12px 10px !important;
-    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+    grid-template-columns: 1fr !important;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
-  /* Product cards — tighter on mobile */
-  .p-body { padding: 12px 6px 4px; }
-  .p-name { font-size: 11px; letter-spacing: 0.1em; min-height: 28px; }
-  .p-price-row { margin-top: 6px; font-size: 13px; }
-  .p-save { font-size: 10px; }
+  /* Product cards — single column, full width */
+  .p-img { aspect-ratio: 1/1; }
+  .p-body { padding: 14px 10px 8px; }
+  .p-name { font-size: 13px; letter-spacing: 0.12em; min-height: auto; }
+  .p-price-row { margin-top: 8px; font-size: 15px; }
+  .p-save { font-size: 11px; }
+  .p-quick { bottom: 12px !important; }
 
   /* Pagination */
   .pagination { padding: 10px 14px 16px; flex-wrap: wrap; gap: 6px; }
@@ -200,8 +221,8 @@
 }
 
 @media (max-width: 480px) {
-  /* Catalog stays 2-col, cards just get smaller */
-  .product-grid { grid-template-columns: 1fr 1fr !important; }
+  /* Single column on small screens */
+  .product-grid { grid-template-columns: 1fr !important; }
   .cats-grid { grid-template-columns: 1fr !important; }
 
   .hero-meta > div { width: 47%; }
