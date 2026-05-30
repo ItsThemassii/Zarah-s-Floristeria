@@ -10,7 +10,6 @@ import { supabase } from "./supabase-config.js";
   // .htaccess, etc). Aquí solo pedimos contraseña de inicio de sesión.
 
   const SALES_KEY    = "zarah_sales_v1";
-  const CLIENTS_KEY  = "zarah_clients_v1";
   const SETTINGS_KEY = "zarah_settings_v1";
   const THEME_KEY    = "zarah_theme_v1";
   const ACCENT_KEY   = "zarah_accent_v1";
@@ -19,6 +18,7 @@ import { supabase } from "./supabase-config.js";
   // ---------- state ----------
   let state = {
     products: [],
+    clients: [],
     search: "",
     filter: "all",
     sort: "default",
@@ -223,7 +223,7 @@ import { supabase } from "./supabase-config.js";
       s.style.display = s.dataset.view === v ? "" : "none";
     });
     if (v === "ventas") renderSales();
-    if (v === "clientes") renderClients();
+    if (v === "clientes") cargarYMostrarClientes();
     if (v === "ajustes") renderSettings();
   }
 
@@ -296,16 +296,74 @@ import { supabase } from "./supabase-config.js";
     toast("Venta registrada", "success");
   }
 
-  // ---------- CLIENTS ----------
-  function getClients() {
-    try { return JSON.parse(localStorage.getItem(CLIENTS_KEY) || "[]"); }
-    catch (e) { return []; }
+  // ---------- CLIENTS (Supabase) ----------
+  // Traduce una fila de la tabla `clientes` (columnas en español) al formato
+  // interno que usa renderClients() — mismo patrón que normalizarProducto().
+  function normalizarCliente(row) {
+    return {
+      id: String(row.id),
+      name: row.nombre,
+      phone: row.whatsapp || "",
+      notes: row.notas || ""
+    };
   }
-  function setClients(arr) { localStorage.setItem(CLIENTS_KEY, JSON.stringify(arr)); renderClients(); }
+
+  // Trae la libreta completa ordenada por fecha de creación descendente
+  // (los clientes más nuevos primero). Lanza el error si algo falla.
+  async function fetchClientes() {
+    const { data, error } = await supabase
+      .from("clientes")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data || []).map(normalizarCliente);
+  }
+
+  // Estado "Cargando…" dentro del grid mientras Supabase responde.
+  function showClientsLoading() {
+    const grid = document.getElementById("clientsGrid");
+    if (!grid) return;
+    grid.innerHTML = `
+      <div class="sale-empty" style="grid-column: 1 / -1">
+        <div class="ic">⏳</div>
+        <div class="t">Cargando clientes…</div>
+        <div>Trayendo tu libreta de contactos desde la base de datos.</div>
+      </div>`;
+  }
+
+  // Estado de error con botón "Reintentar".
+  function showClientsError() {
+    const grid = document.getElementById("clientsGrid");
+    if (!grid) return;
+    grid.innerHTML = `
+      <div class="sale-empty" style="grid-column: 1 / -1">
+        <div class="ic">⚠️</div>
+        <div class="t">No se pudo cargar la libreta de clientes</div>
+        <div>Revisa tu conexión e inténtalo de nuevo.</div>
+        <button class="btn-new" id="clientsRetry" style="margin-top:14px">Reintentar</button>
+      </div>`;
+    const retry = document.getElementById("clientsRetry");
+    if (retry) retry.onclick = cargarYMostrarClientes;
+  }
+
+  // Orquesta la carga: muestra "Cargando", trae de Supabase y pinta el grid;
+  // si algo falla, muestra el estado de error.
+  async function cargarYMostrarClientes() {
+    showClientsLoading();
+    try {
+      state.clients = await fetchClientes();
+      renderClients();
+    } catch (e) {
+      console.error("Error cargando clientes desde Supabase:", e);
+      showClientsError();
+      toast("No se pudo cargar la libreta de clientes", "error");
+    }
+  }
+
   function renderClients() {
     const grid = document.getElementById("clientsGrid");
     if (!grid) return;
-    const clients = getClients();
+    const clients = state.clients;
     if (!clients.length) {
       grid.innerHTML = `
         <div class="sale-empty" style="grid-column: 1 / -1">
@@ -332,25 +390,95 @@ import { supabase } from "./supabase-config.js";
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
               WhatsApp
             </a>` : ""}
+            <button class="client-edit" data-act="edit">Editar</button>
             <button class="client-del" data-act="del">Eliminar</button>
           </div>
         </div>`;
     }).join("");
   }
-  function addClient() {
+
+  // INSERT en Supabase. No es optimista: necesitamos el `id` real que genera la
+  // base de datos antes de pintar la tarjeta (para que editar/borrar después
+  // apunten al registro correcto). Mientras tanto, deshabilitamos el botón.
+  async function addClient() {
     const name = prompt("Nombre del cliente:");
     if (!name || !name.trim()) return;
-    const phone = prompt("Teléfono (con código de país, ej: 51994684237):") || "";
+    const phone = prompt("WhatsApp (con código de país, ej: 51994684237):") || "";
     const notes = prompt("Notas (opcional, ej: prefiere rosas rosadas):") || "";
-    const clients = getClients();
-    clients.unshift({
-      id: "c" + Date.now(),
-      name: name.trim(),
-      phone: phone.trim(),
-      notes: notes.trim()
-    });
-    setClients(clients);
-    toast("Cliente añadido", "success");
+
+    const btn = document.getElementById("btnNewClient");
+    if (btn) btn.disabled = true;
+
+    try {
+      const { data, error } = await supabase
+        .from("clientes")
+        .insert({ nombre: name.trim(), whatsapp: phone.trim(), notas: notes.trim() })
+        .select()
+        .single();
+      if (error) throw error;
+
+      // El más nuevo va al principio (coincide con el orden de fetchClientes).
+      state.clients.unshift(normalizarCliente(data));
+      renderClients();
+      toast("Cliente añadido", "success");
+    } catch (error) {
+      reportError(error, "No se pudo añadir el cliente");
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  // UPDATE optimista: pre-rellena los datos en prompts, aplica el cambio en la
+  // vista de inmediato y, si Supabase lo rechaza, revierte al estado anterior.
+  async function editClient(id) {
+    const c = state.clients.find(x => x.id === id);
+    if (!c) return;
+
+    const name = prompt("Nombre del cliente:", c.name);
+    if (name === null) return;                 // canceló el primer prompt
+    if (!name.trim()) { toast("El nombre no puede quedar vacío"); return; }
+    const phone = prompt("WhatsApp (con código de país, ej: 51994684237):", c.phone);
+    if (phone === null) return;
+    const notes = prompt("Notas (opcional):", c.notes);
+    if (notes === null) return;
+
+    const before = { name: c.name, phone: c.phone, notes: c.notes };
+    c.name = name.trim();
+    c.phone = phone.trim();
+    c.notes = notes.trim();
+    renderClients(); // optimista
+
+    const { error } = await supabase
+      .from("clientes")
+      .update({ nombre: c.name, whatsapp: c.phone, notas: c.notes })
+      .eq("id", id);
+    if (error) {
+      c.name = before.name; c.phone = before.phone; c.notes = before.notes;
+      renderClients();
+      reportError(error, "No se pudo guardar el cliente");
+    } else {
+      toast("Cliente actualizado", "success");
+    }
+  }
+
+  // DELETE con confirmación. Optimista: quita la tarjeta antes de confirmar con
+  // la base de datos y la reinserta en su posición original si la borrada falla.
+  async function deleteClient(id) {
+    const idx = state.clients.findIndex(x => x.id === id);
+    if (idx < 0) return;
+    const c = state.clients[idx];
+    if (!confirm(`¿Eliminar a "${c.name}"?`)) return;
+
+    state.clients.splice(idx, 1);
+    renderClients();
+    toast("Cliente eliminado");
+
+    const { error } = await supabase.from("clientes").delete().eq("id", id);
+    if (error) {
+      state.clients.splice(idx, 0, c);
+      renderClients();
+      reportError(error, "No se pudo eliminar el cliente");
+    }
   }
 
   // ---------- SETTINGS ----------
@@ -408,7 +536,7 @@ import { supabase } from "./supabase-config.js";
     const data = {
       products: state.products,
       sales: getSales(),
-      clients: getClients(),
+      clients: state.clients,
       settings: getSettings(),
       exportedAt: new Date().toISOString()
     };
@@ -901,31 +1029,130 @@ import { supabase } from "./supabase-config.js";
       prev.classList.remove("show");
       prev.style.backgroundImage = "";
     }
-    window.__pendingImage = null;
+    window.__pendingFile = null;
   }
   function closeImageModal() {
     document.getElementById("imageModal").classList.remove("open");
     state.editingId = null;
   }
-  function applyImage(src) {
+  // ---------- modal de imagen (Supabase Storage) ----------
+  // Reglas de validación compartidas por las dos pestañas del modal.
+  const MAX_IMG_BYTES = 5 * 1024 * 1024;                        // 5 MB
+  const TIPOS_IMG = ["image/jpeg", "image/png", "image/webp"];  // JPG y JPEG comparten image/jpeg
+  const URL_IMG_RE = /\.(jpe?g|png|webp)(\?.*)?$/i;
+
+  // "Mi Foto Final.JPG" → "mi-foto-final" (sin extensión, sin caracteres raros).
+  function sanitizarNombre(nombre) {
+    const base = nombre
+      .replace(/\.[^.]+$/, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 40);
+    return base || "imagen";
+  }
+
+  // Refleja la nueva imagen en el estado local + la tabla y cierra el modal.
+  function aplicarImagenEnUI(url) {
     const p = state.products.find(x => x.id === state.editingId);
-    if (!p) return;
-    p.img = src;
-    saveProducts();
+    if (p) p.img = url;
     closeImageModal();
     renderTable();
     toast("Imagen actualizada", "success");
   }
+
+  // UPDATE de imagen_url en Supabase. Devuelve el error (o null) para que el
+  // llamador decida cómo reaccionar. Supabase es la fuente de verdad: ya no
+  // tocamos localStorage para la imagen.
+  async function guardarImagenUrl(id, url) {
+    const { error } = await supabase
+      .from("productos")
+      .update({ imagen_url: url })
+      .eq("id", id);
+    return error;
+  }
+
+  // Pestaña "Subir archivo": sube el archivo al bucket, obtiene su URL pública
+  // y la guarda en imagen_url. Muestra progreso en el botón Guardar.
+  async function subirYGuardarImagen(file) {
+    const id = state.editingId;
+    if (!id || !file) { toast("Sube una imagen primero"); return; }
+
+    const btn = document.getElementById("imageSave");
+    const htmlOriginal = btn.innerHTML;
+    btn.disabled = true;
+    btn.textContent = "Subiendo…";
+
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${Date.now()}-${sanitizarNombre(file.name)}.${ext}`;
+
+      const { error: upErr } = await supabase.storage
+        .from("productos-imagenes")
+        .upload(path, file, { contentType: file.type });
+      if (upErr) throw upErr;
+
+      const { data } = supabase.storage
+        .from("productos-imagenes")
+        .getPublicUrl(path);
+      const url = data.publicUrl;
+
+      const dbErr = await guardarImagenUrl(id, url);
+      if (dbErr) throw dbErr;
+
+      btn.textContent = "Listo";
+      aplicarImagenEnUI(url);
+    } catch (e) {
+      reportError(e, "No se pudo subir la imagen");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = htmlOriginal;
+    }
+  }
+
+  // Pestaña "Desde URL": valida el formato y guarda la URL externa tal cual,
+  // sin subir nada al bucket.
+  async function guardarImagenDesdeUrl(url) {
+    const id = state.editingId;
+    if (!id) return;
+    if (!URL_IMG_RE.test(url)) {
+      toast("La URL debe terminar en .jpg, .png o .webp");
+      return;
+    }
+
+    const btn = document.getElementById("imageSave");
+    btn.disabled = true;
+    try {
+      const dbErr = await guardarImagenUrl(id, url);
+      if (dbErr) throw dbErr;
+      aplicarImagenEnUI(url);
+    } catch (e) {
+      reportError(e, "No se pudo guardar la imagen");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // Selección/arrastre de archivo: valida y muestra una vista previa local.
+  // La subida real ocurre al pulsar Guardar (ver subirYGuardarImagen).
   function handleFile(file) {
-    if (!file || !file.type.startsWith("image/")) { toast("Selecciona una imagen válida"); return; }
+    if (!file) return;
+    if (!TIPOS_IMG.includes(file.type)) {
+      toast("Formato inválido. Usa JPG, PNG o WEBP.");
+      return;
+    }
+    if (file.size > MAX_IMG_BYTES) {
+      toast("La imagen supera el límite de 5MB.");
+      return;
+    }
     const r = new FileReader();
     r.onload = (e) => {
       const prev = document.querySelector("#imageModal .upload-preview");
       prev.style.backgroundImage = `url("${e.target.result}")`;
       prev.classList.add("show");
-      window.__pendingImage = e.target.result;
     };
     r.readAsDataURL(file);
+    window.__pendingFile = file;
   }
 
   // ---------- init ----------
@@ -980,11 +1207,9 @@ import { supabase } from "./supabase-config.js";
     document.getElementById("clientsGrid").addEventListener("click", (e) => {
       const card = e.target.closest(".client-card"); if (!card) return;
       const act = e.target.closest("[data-act]")?.dataset.act;
-      if (act === "del") {
-        const clients = getClients().filter(c => c.id !== card.dataset.id);
-        setClients(clients);
-        toast("Cliente eliminado");
-      }
+      const id = card.dataset.id;
+      if (act === "edit") editClient(id);
+      else if (act === "del") deleteClient(id);
     });
 
     // Ajustes — Tema
@@ -1081,12 +1306,11 @@ import { supabase } from "./supabase-config.js";
     document.getElementById("imageSave").onclick = () => {
       const tab = document.querySelector("#imageModal .tab-btn.active").dataset.tab;
       if (tab === "upload") {
-        if (window.__pendingImage) applyImage(window.__pendingImage);
-        else toast("Sube una imagen primero");
+        subirYGuardarImagen(window.__pendingFile);
       } else {
         const url = document.getElementById("urlInput").value.trim();
         if (!url) { toast("Pega una URL"); return; }
-        applyImage(url);
+        guardarImagenDesdeUrl(url);
       }
     };
 
