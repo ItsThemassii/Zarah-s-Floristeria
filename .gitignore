@@ -1,0 +1,12 @@
+# Credenciales de Supabase — NO subir al repositorio.
+# La anon key es pública por diseño, pero preferimos no exponerla en GitHub.
+# En producción (Netlify) se inyecta como variable de entorno.
+supabase-config.js
+
+# Dependencias (por si más adelante se agrega un build step)
+node_modules/
+
+# Logs y temporales
+*.log
+.DS_Store
+Thumbs.db
