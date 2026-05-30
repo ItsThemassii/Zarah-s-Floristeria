@@ -47,5 +47,3 @@ window.CATEGORIES = [
   { id: "cajas",      label: "Cajas regalo" },
   { id: "ninos",      label: "Niños" }
 ];
-
-window.ADMIN_PASSWORD = "zarah2025"; // password de demo

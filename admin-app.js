@@ -1,6 +1,7 @@
+import { supabase } from "./supabase-config.js";
+
 (function () {
   const STORAGE_KEY = "zarah_products_v1";
-  const ADMIN_KEY   = "zarah_admin_session";
   const ADMIN_PATH_KEY = "zarah_admin_path"; // url secret token verification
 
   // ---------- access control ----------
@@ -59,11 +60,6 @@
   function saveProducts() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.products));
   }
-  function isAuth() { return sessionStorage.getItem(ADMIN_KEY) === "ok"; }
-  function setAuth(v) {
-    if (v) sessionStorage.setItem(ADMIN_KEY, "ok");
-    else sessionStorage.removeItem(ADMIN_KEY);
-  }
 
   // ---------- helpers ----------
   function escapeHTML(s) {
@@ -81,7 +77,7 @@
   function showLogin() {
     document.getElementById("loginShell").style.display = "grid";
     document.getElementById("appShell").style.display = "none";
-    setTimeout(() => document.getElementById("loginPass").focus(), 80);
+    setTimeout(() => document.getElementById("loginEmail").focus(), 80);
   }
   function showApp() {
     document.getElementById("loginShell").style.display = "none";
@@ -332,17 +328,40 @@
     toast("Catálogo restablecido", "success");
   }
 
-  function tryLogin() {
-    const pw = document.getElementById("loginPass").value;
-    const expected = localStorage.getItem(PASSWORD_KEY) || window.ADMIN_PASSWORD;
-    if (pw === expected) {
-      setAuth(true);
-      document.querySelector(".login-card .err").classList.remove("show");
-      showApp();
-    } else {
-      const err = document.querySelector(".login-card .err");
-      err.textContent = "Contraseña incorrecta.";
+  async function tryLogin() {
+    const email = document.getElementById("loginEmail").value.trim();
+    const pw    = document.getElementById("loginPass").value;
+    const err   = document.querySelector(".login-card .err");
+    const btn   = document.getElementById("loginSubmit");
+
+    err.classList.remove("show");
+
+    if (!email || !pw) {
+      err.textContent = "Ingresa tu email y contraseña.";
       err.classList.add("show");
+      return;
+    }
+
+    // Estado "esperando": deshabilita el botón y muestra feedback,
+    // guardando el contenido original (SVG incluido) para restaurarlo.
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = "Verificando…";
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
+      if (error) {
+        err.textContent = error.message;
+        err.classList.add("show");
+      } else {
+        showApp();
+      }
+    } catch (e) {
+      err.textContent = e.message || "No se pudo conectar. Revisa tu conexión.";
+      err.classList.add("show");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
     }
   }
 
@@ -688,23 +707,25 @@
   }
 
   // ---------- init ----------
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     state.products = loadProducts();
 
-    // Auth state
-    if (isAuth()) showApp();
+    // Auth state — verifica si ya hay sesión activa en Supabase
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) showApp();
     else showLogin();
 
     // Login form
     document.getElementById("loginSubmit").onclick = tryLogin;
-    document.getElementById("loginPass").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") tryLogin();
-    });
+    const onEnter = (e) => { if (e.key === "Enter") tryLogin(); };
+    document.getElementById("loginEmail").addEventListener("keydown", onEnter);
+    document.getElementById("loginPass").addEventListener("keydown", onEnter);
 
     // Logout
-    document.getElementById("logoutBtn").onclick = () => {
+    document.getElementById("logoutBtn").onclick = async () => {
       if (confirm("¿Cerrar sesión?")) {
-        setAuth(false);
+        await supabase.auth.signOut();
+        document.getElementById("loginEmail").value = "";
         document.getElementById("loginPass").value = "";
         showLogin();
       }
