@@ -10,20 +10,36 @@ import { supabase } from "./supabase-config.js";
   // .htaccess, etc). Aquí solo pedimos contraseña de inicio de sesión.
 
   const SALES_KEY    = "zarah_sales_v1";
-  const SETTINGS_KEY = "zarah_settings_v1";
-  const THEME_KEY    = "zarah_theme_v1";
-  const ACCENT_KEY   = "zarah_accent_v1";
-  const PASSWORD_KEY = "zarah_password_v1";
+
+  // Valores por defecto de cada clave de la tabla `configuracion`. Se usan
+  // cuando una clave aún no existe en la base de datos (o vino vacía), para
+  // que la UI nunca quede en blanco.
+  const CONFIG_DEFAULTS = {
+    nombre_tienda: "Zarah's",
+    whatsapp:      "51994684237",
+    horario:       "Lun – Sáb · 9:00 a.m. – 6:00 p.m.",
+    area_entrega:  "Callao y Lima",
+    tema:          "light",
+    color_marca:   "#c75a87"
+  };
 
   // ---------- state ----------
   let state = {
     products: [],
     clients: [],
+    config: {},        // { clave: valor } cargado desde la tabla `configuracion`
     search: "",
     filter: "all",
     sort: "default",
     editingId: null
   };
+
+  // Devuelve el valor de una clave de configuración, o su valor por defecto si
+  // todavía no está cargada o vino vacía.
+  function cfg(clave) {
+    const v = state.config[clave];
+    return (v == null || v === "") ? CONFIG_DEFAULTS[clave] : v;
+  }
 
   // ---------- persistence ----------
   const CAT_MIGRATE = {
@@ -186,34 +202,74 @@ import { supabase } from "./supabase-config.js";
     document.getElementById("appShell").style.display = "grid";
     // Catálogo desde Supabase (muestra "Cargando…", luego tabla + stats).
     cargarYMostrarProductos();
-    applyThemeFromStorage();
-    applyAccentFromStorage();
+    // Configuración desde Supabase (tema, color de marca e info de la tienda).
+    cargarConfiguracion();
+  }
+
+  // ---------- CONFIGURACIÓN (Supabase) ----------
+  // Trae todas las filas de la tabla `configuracion` y las guarda en
+  // state.config como un objeto { clave: valor }. Luego aplica el tema y el
+  // color de marca guardados. Se llama una sola vez al entrar (showApp).
+  async function cargarConfiguracion() {
+    try {
+      const { data, error } = await supabase.from("configuracion").select("*");
+      if (error) throw error;
+      state.config = {};
+      (data || []).forEach(row => { state.config[row.clave] = row.valor; });
+    } catch (e) {
+      console.error("Error cargando configuración desde Supabase:", e);
+      state.config = {};
+      toast("No se pudo cargar la configuración", "error");
+    }
+    // Aplicar apariencia (con defaults si alguna clave falta).
+    applyTema(cfg("tema"));
+    applyColorMarca(cfg("color_marca"));
   }
 
   // ---------- THEME + ACCENT ----------
-  function applyThemeFromStorage() {
-    const theme = localStorage.getItem(THEME_KEY) || "light";
-    document.body.setAttribute("data-theme", theme);
-    const radio = document.querySelector(`input[name="theme"][value="${theme}"]`);
+  // Aplican un valor concreto a la vista (sin tocar la base de datos).
+  function applyTema(tema) {
+    document.body.setAttribute("data-theme", tema);
+    const radio = document.querySelector(`input[name="theme"][value="${tema}"]`);
     if (radio) radio.checked = true;
   }
-  function applyAccentFromStorage() {
-    const accent = localStorage.getItem(ACCENT_KEY) || "#c75a87";
-    document.documentElement.style.setProperty("--rose", accent);
-    document.documentElement.style.setProperty("--pink", accent);
+  function applyColorMarca(color) {
+    document.documentElement.style.setProperty("--rose", color);
+    document.documentElement.style.setProperty("--pink", color);
     document.querySelectorAll(".acc-sw").forEach(b => {
-      b.classList.toggle("active", b.dataset.color === accent);
+      b.classList.toggle("active", b.dataset.color === color);
     });
   }
-  function setTheme(t) {
-    localStorage.setItem(THEME_KEY, t);
-    applyThemeFromStorage();
-    toast("Tema actualizado", "success");
+  // UPDATE optimista de la clave `tema`: aplica el cambio al toque y lo revierte
+  // si Supabase lo rechaza.
+  async function setTema(tema) {
+    const before = state.config.tema;
+    state.config.tema = tema;
+    applyTema(tema);
+    const { error } = await supabase
+      .from("configuracion").update({ valor: tema }).eq("clave", "tema");
+    if (error) {
+      state.config.tema = before;
+      applyTema(cfg("tema"));
+      reportError(error, "No se pudo guardar el tema");
+    } else {
+      toast("Tema actualizado", "success");
+    }
   }
-  function setAccent(c) {
-    localStorage.setItem(ACCENT_KEY, c);
-    applyAccentFromStorage();
-    toast("Color de marca actualizado", "success");
+  // UPDATE optimista de la clave `color_marca`.
+  async function setColorMarca(color) {
+    const before = state.config.color_marca;
+    state.config.color_marca = color;
+    applyColorMarca(color);
+    const { error } = await supabase
+      .from("configuracion").update({ valor: color }).eq("clave", "color_marca");
+    if (error) {
+      state.config.color_marca = before;
+      applyColorMarca(cfg("color_marca"));
+      reportError(error, "No se pudo guardar el color de marca");
+    } else {
+      toast("Color de marca actualizado", "success");
+    }
   }
 
   // ---------- VIEW SWITCHER ----------
@@ -482,80 +538,175 @@ import { supabase } from "./supabase-config.js";
   }
 
   // ---------- SETTINGS ----------
-  function getSettings() {
-    try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"); }
-    catch (e) { return {}; }
-  }
-  function setSettings(s) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+  // Rellena los inputs de "Información de la tienda" desde la configuración ya
+  // cargada en state.config (con defaults si falta alguna clave).
   function renderSettings() {
-    const s = getSettings();
-    document.getElementById("setStoreName").value = s.storeName || "Zarah's";
-    document.getElementById("setWhatsapp").value  = s.whatsapp  || "51994684237";
-    document.getElementById("setHours").value     = s.hours     || "Lun – Sáb · 9:00 a.m. – 6:00 p.m.";
-    document.getElementById("setArea").value      = s.area      || "Callao y Lima";
+    document.getElementById("setStoreName").value = cfg("nombre_tienda");
+    document.getElementById("setWhatsapp").value  = cfg("whatsapp");
+    document.getElementById("setHours").value     = cfg("horario");
+    document.getElementById("setArea").value      = cfg("area_entrega");
   }
-  function saveStoreInfo() {
-    const s = {
-      storeName: document.getElementById("setStoreName").value.trim() || "Zarah's",
-      whatsapp:  document.getElementById("setWhatsapp").value.replace(/\D/g, "") || "51994684237",
-      hours:     document.getElementById("setHours").value.trim(),
-      area:      document.getElementById("setArea").value.trim()
+
+  // Guarda la info de la tienda: un UPDATE por cada clave de `configuracion`,
+  // todos en paralelo. Si alguno falla, avisa y no marca el estado como guardado.
+  async function saveStoreInfo() {
+    const btn = document.getElementById("saveStoreInfo");
+    const valores = {
+      nombre_tienda: document.getElementById("setStoreName").value.trim() || "Zarah's",
+      whatsapp:      document.getElementById("setWhatsapp").value.replace(/\D/g, "") || "51994684237",
+      horario:       document.getElementById("setHours").value.trim(),
+      area_entrega:  document.getElementById("setArea").value.trim()
     };
-    setSettings(s);
-    toast("Datos guardados", "success");
+    // Reflejar el WhatsApp ya normalizado (solo dígitos) en el input.
+    document.getElementById("setWhatsapp").value = valores.whatsapp;
+
+    if (btn) btn.disabled = true;
+    try {
+      const resultados = await Promise.all(
+        Object.entries(valores).map(([clave, valor]) =>
+          supabase.from("configuracion").update({ valor }).eq("clave", clave))
+      );
+      const fallo = resultados.find(r => r.error);
+      if (fallo) throw fallo.error;
+
+      Object.assign(state.config, valores); // sincronizar el estado local
+      toast("Datos guardados", "success");
+    } catch (error) {
+      reportError(error, "No se pudieron guardar los datos");
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   }
-  function changePassword() {
+
+  // Cambia la contraseña del admin con Supabase Auth. Re-verifica la contraseña
+  // actual (reintentando el login) antes de aplicar el cambio, para confirmar
+  // que es el dueño y no alguien que encontró la sesión abierta.
+  async function changePassword() {
     const hint = document.getElementById("passHint");
     const oldP = document.getElementById("setPassOld").value;
     const newP = document.getElementById("setPassNew").value;
     const cnf  = document.getElementById("setPassConfirm").value;
-    const expected = localStorage.getItem(PASSWORD_KEY) || window.ADMIN_PASSWORD;
+    const btn  = document.getElementById("savePass");
 
     hint.className = "settings-hint";
-    if (oldP !== expected) {
-      hint.textContent = "La contraseña actual es incorrecta.";
-      hint.classList.add("error"); return;
-    }
-    if (!newP || newP.length < 6) {
-      hint.textContent = "La nueva contraseña debe tener al menos 6 caracteres.";
+    if (!newP || newP.length < 8) {
+      hint.textContent = "La nueva contraseña debe tener al menos 8 caracteres.";
       hint.classList.add("error"); return;
     }
     if (newP !== cnf) {
       hint.textContent = "La confirmación no coincide.";
       hint.classList.add("error"); return;
     }
-    localStorage.setItem(PASSWORD_KEY, newP);
-    document.getElementById("setPassOld").value = "";
-    document.getElementById("setPassNew").value = "";
-    document.getElementById("setPassConfirm").value = "";
-    hint.textContent = "Contraseña actualizada correctamente.";
-    hint.classList.add("success");
-    toast("Contraseña actualizada", "success");
+    if (!oldP) {
+      hint.textContent = "Ingresa tu contraseña actual para confirmar el cambio.";
+      hint.classList.add("error"); return;
+    }
+
+    btn.disabled = true;
+    try {
+      // 1. Email del admin con sesión activa.
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No hay sesión activa.");
+
+      // 2. Re-verificar la contraseña actual reintentando el login.
+      const { error: reauthError } = await supabase.auth.signInWithPassword({
+        email: user.email, password: oldP
+      });
+      if (reauthError) {
+        hint.textContent = "La contraseña actual es incorrecta.";
+        hint.classList.add("error");
+        return;
+      }
+
+      // 3. Aplicar la nueva contraseña.
+      const { error } = await supabase.auth.updateUser({ password: newP });
+      if (error) throw error;
+
+      document.getElementById("setPassOld").value = "";
+      document.getElementById("setPassNew").value = "";
+      document.getElementById("setPassConfirm").value = "";
+      hint.textContent = "Contraseña actualizada correctamente.";
+      hint.classList.add("success");
+      toast("Contraseña actualizada", "success");
+    } catch (error) {
+      console.error("Error al cambiar la contraseña:", error);
+      hint.textContent = "No se pudo actualizar: " + (error?.message || "error");
+      hint.classList.add("error");
+    } finally {
+      btn.disabled = false;
+    }
   }
-  function exportBackup() {
-    const data = {
-      products: state.products,
-      sales: getSales(),
-      clients: state.clients,
-      settings: getSettings(),
-      exportedAt: new Date().toISOString()
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url  = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `zarah-backup-${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-    toast("Respaldo descargado", "success");
+
+  // Exporta un respaldo completo: SELECT * de las 4 tablas y descarga un .json.
+  async function exportBackup() {
+    const btn = document.getElementById("btnExport");
+    if (btn) btn.disabled = true;
+    try {
+      const [prod, vent, cli, conf] = await Promise.all([
+        supabase.from("productos").select("*").order("id", { ascending: true }),
+        supabase.from("ventas").select("*").order("id", { ascending: true }),
+        supabase.from("clientes").select("*").order("id", { ascending: true }),
+        supabase.from("configuracion").select("*")
+      ]);
+      for (const r of [prod, vent, cli, conf]) if (r.error) throw r.error;
+
+      const data = {
+        exportedAt: new Date().toISOString(),
+        productos:     prod.data || [],
+        ventas:        vent.data || [],
+        clientes:      cli.data  || [],
+        configuracion: conf.data || []
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url  = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `zarah-backup-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      toast("Respaldo descargado", "success");
+    } catch (error) {
+      reportError(error, "No se pudo exportar el respaldo");
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   }
-  function resetCatalog() {
-    if (!confirm("¿Estás seguro? Se restablecerá el catálogo a su estado original y se perderán tus cambios.")) return;
-    localStorage.removeItem(STORAGE_KEY);
-    state.products = loadProducts();
-    renderTable();
-    renderStats();
-    toast("Catálogo restablecido", "success");
+
+  // PELIGROSO: borra TODOS los productos y reimporta los originales del CSV de la
+  // Semana 3 (guardados en database/productos-iniciales.json). Pide doble
+  // confirmación: un aviso y, además, escribir RESTABLECER.
+  async function resetCatalog() {
+    if (!confirm(
+      "⚠️ PELIGRO: esto BORRARÁ todos los productos actuales y los reemplazará " +
+      "por el catálogo original.\n\nSe perderán tus cambios (precios, fotos, " +
+      "productos nuevos). Esta acción NO se puede deshacer.\n\n¿Continuar?")) return;
+    const palabra = prompt('Para confirmar, escribe RESTABLECER (en mayúsculas):');
+    if (palabra !== "RESTABLECER") { toast("Restablecimiento cancelado"); return; }
+
+    const btn = document.getElementById("btnReset");
+    if (btn) { btn.disabled = true; btn.textContent = "Restableciendo…"; }
+    try {
+      // 1. Leer los productos originales desde el archivo del repo.
+      const resp = await fetch("./database/productos-iniciales.json");
+      if (!resp.ok) throw new Error("No se pudo leer productos-iniciales.json");
+      const iniciales = await resp.json();
+
+      // 2. Borrar TODOS los productos actuales (el filtro id >= 0 cubre todas las filas).
+      const { error: delErr } = await supabase.from("productos").delete().gte("id", 0);
+      if (delErr) throw delErr;
+
+      // 3. Reinsertar los originales.
+      const { error: insErr } = await supabase.from("productos").insert(iniciales);
+      if (insErr) throw insErr;
+
+      // 4. Recargar la tabla desde Supabase.
+      await cargarYMostrarProductos();
+      toast("Catálogo restablecido", "success");
+    } catch (error) {
+      reportError(error, "No se pudo restablecer el catálogo");
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "Restablecer"; }
+    }
   }
 
   async function tryLogin() {
@@ -1214,13 +1365,13 @@ import { supabase } from "./supabase-config.js";
 
     // Ajustes — Tema
     document.querySelectorAll('input[name="theme"]').forEach(r => {
-      r.onchange = () => setTheme(r.value);
+      r.onchange = () => setTema(r.value);
     });
 
     // Ajustes — Acento
     document.getElementById("accentSwatches").addEventListener("click", (e) => {
       const sw = e.target.closest(".acc-sw");
-      if (sw) setAccent(sw.dataset.color);
+      if (sw) setColorMarca(sw.dataset.color);
     });
 
     // Ajustes — Información tienda

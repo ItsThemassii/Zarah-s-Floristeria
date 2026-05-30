@@ -1,10 +1,17 @@
 /* Productos page — catálogo público (solo lectura).
    La administración se hace desde admin.html — el cliente nunca ve botones de edición. */
 import { supabase } from "./supabase-config.js";
+import { cargarConfig, aplicarConfigDom, CONFIG_DEFAULTS } from "./config-publico.js";
 
 (function () {
   const STORAGE_KEY = "zarah_products_v1";
   const PER_PAGE = 12;
+
+  // Configuración de la tienda (WhatsApp, etc.) leída desde Supabase en el init.
+  // Empieza con los defaults para que los enlaces funcionen aunque, por alguna
+  // razón, se intente usar antes de que termine la carga.
+  let configTienda = { ...CONFIG_DEFAULTS };
+  const waNumero = () => configTienda.whatsapp || CONFIG_DEFAULTS.whatsapp;
 
   let state = {
     products: [],
@@ -398,7 +405,7 @@ import { supabase } from "./supabase-config.js";
       }
       const extras = getModalExtras();
       const msg = encodeURIComponent(buildWhatsappMsg(p, extras));
-      reserveBtn.href = `https://wa.me/51994684237?text=${msg}`;
+      reserveBtn.href = `https://wa.me/${waNumero()}?text=${msg}`;
 
       // Registrar el pedido en `ventas` (1 producto) antes de abrir WhatsApp.
       // Fire-and-forget: no bloquea la navegación del enlace.
@@ -664,7 +671,7 @@ import { supabase } from "./supabase-config.js";
     msg += `*TOTAL: S/ ${total.toFixed(2)}*\n\n`;
     msg += `¿Tienen disponibilidad? Quedo atenta(o) para coordinar la entrega y el pago. ¡Gracias! 💕`;
     const checkout = document.getElementById("spCheckout");
-    checkout.href = `https://wa.me/51994684237?text=${encodeURIComponent(msg)}`;
+    checkout.href = `https://wa.me/${waNumero()}?text=${encodeURIComponent(msg)}`;
 
     // Registrar el pedido en `ventas` (carrito completo) antes de abrir WhatsApp.
     // Fire-and-forget: el enlace abre WhatsApp igual, falle o no la inserción.
@@ -790,6 +797,13 @@ import { supabase } from "./supabase-config.js";
 
   // ---------- init ----------
   document.addEventListener("DOMContentLoaded", async () => {
+    // Cargar la configuración de la tienda (WhatsApp, etc.) y aplicarla al DOM
+    // ANTES de habilitar cualquier interacción, para que los enlaces de WhatsApp
+    // (flotante y los que se arman al reservar) usen el número actualizado y no
+    // el viejo hardcodeado. Si Supabase falla, cargarConfig() devuelve defaults.
+    configTienda = await cargarConfig();
+    aplicarConfigDom(configTienda);
+
     // Las categorías y los listeners no dependen de los datos de productos,
     // así que se preparan de inmediato mientras el catálogo carga.
     renderChips();

@@ -1,0 +1,146 @@
+[
+  {
+    "nombre": "Mural Globos Toda Ocasión",
+    "precio": 130,
+    "precio_anterior": 150,
+    "imagen_url": "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=700&q=80",
+    "categorias": ["detalles", "cumple"],
+    "caracteristicas": [],
+    "en_oferta": true
+  },
+  {
+    "nombre": "Centro de Mesa Escarchado",
+    "precio": 85,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=700&q=80",
+    "categorias": ["detalles"],
+    "caracteristicas": [],
+    "en_oferta": false
+  },
+  {
+    "nombre": "Mural Numbers Quince",
+    "precio": 169,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=700&q=80",
+    "categorias": ["detalles", "cumple"],
+    "caracteristicas": [],
+    "en_oferta": false
+  },
+  {
+    "nombre": "Decoración Globos con Helio",
+    "precio": 480,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=700&q=80",
+    "categorias": ["equipos", "cumple"],
+    "caracteristicas": [],
+    "en_oferta": false
+  },
+  {
+    "nombre": "Mural Deluxe I Love You",
+    "precio": 169,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=700&q=80",
+    "categorias": ["detalles", "amor"],
+    "caracteristicas": [],
+    "en_oferta": false
+  },
+  {
+    "nombre": "Mural Arcoíris Colorido",
+    "precio": 149,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1530092285049-1c42085fd395?w=700&q=80",
+    "categorias": ["detalles", "ninos"],
+    "caracteristicas": [],
+    "en_oferta": false
+  },
+  {
+    "nombre": "Mural Numbers Especial",
+    "precio": 225,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=700&q=80",
+    "categorias": ["detalles", "cumple"],
+    "caracteristicas": [],
+    "en_oferta": false
+  },
+  {
+    "nombre": "Arco Clásico Estándar",
+    "precio": 85,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=700&q=80",
+    "categorias": ["equipos"],
+    "caracteristicas": [],
+    "en_oferta": false
+  },
+  {
+    "nombre": "Parante Grande Graduación",
+    "precio": 195,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=700&q=80",
+    "categorias": ["equipos", "graduacion"],
+    "caracteristicas": [],
+    "en_oferta": false
+  },
+  {
+    "nombre": "Mural HB Rose Gold",
+    "precio": 175,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=700&q=80",
+    "categorias": ["detalles", "cumple"],
+    "caracteristicas": [],
+    "en_oferta": false
+  },
+  {
+    "nombre": "Mural HB Especial Azul",
+    "precio": 325,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1525013066836-c6090f0ad9d8?w=700&q=80",
+    "categorias": ["detalles", "cumple"],
+    "caracteristicas": [],
+    "en_oferta": false
+  },
+  {
+    "nombre": "Mural Number Especial",
+    "precio": 215,
+    "precio_anterior": 245,
+    "imagen_url": "https://images.unsplash.com/photo-1612392061787-2d078b3e573a?w=700&q=80",
+    "categorias": ["detalles", "cumple"],
+    "caracteristicas": [],
+    "en_oferta": true
+  },
+  {
+    "nombre": "Caja Sorpresa Premium",
+    "precio": 95,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=700&q=80",
+    "categorias": ["cajas", "amor"],
+    "caracteristicas": [],
+    "en_oferta": false
+  },
+  {
+    "nombre": "Ramo Aurora Pastel",
+    "precio": 72,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=700&q=80",
+    "categorias": ["flores", "amor"],
+    "caracteristicas": [],
+    "en_oferta": false
+  },
+  {
+    "nombre": "Rosas de Bohemia",
+    "precio": 58,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=700&q=80",
+    "categorias": ["flores", "amor"],
+    "caracteristicas": [],
+    "en_oferta": false
+  },
+  {
+    "nombre": "Tulipanes Coral",
+    "precio": 64,
+    "precio_anterior": null,
+    "imagen_url": "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=700&q=80",
+    "categorias": ["flores", "amor", "cumple"],
+    "caracteristicas": [],
+    "en_oferta": false
+  }
+]
