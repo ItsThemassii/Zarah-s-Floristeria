@@ -61,6 +61,77 @@ import { supabase } from "./supabase-config.js";
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.products));
   }
 
+  // ---------- lectura desde Supabase (catálogo) ----------
+  // Traduce una fila de la tabla `productos` (columnas en español) al formato
+  // interno que ya usan renderTable() y renderStats(). Es una copia de la
+  // función de products-app.js; se unificará en un módulo compartido más
+  // adelante (esta sesión no tocamos la tienda).
+  function normalizarProducto(row) {
+    return {
+      id: String(row.id),
+      name: row.nombre,
+      price: Number(row.precio),
+      oldPrice: (row.precio_anterior != null) ? Number(row.precio_anterior) : undefined,
+      badge: row.en_oferta ? "Oferta" : "",
+      img: row.imagen_url || "",
+      cats: Array.isArray(row.categorias) ? row.categorias : [],
+      features: Array.isArray(row.caracteristicas) ? row.caracteristicas : []
+    };
+  }
+
+  // Trae el catálogo completo desde Supabase. Lanza el error si algo falla,
+  // para que cargarYMostrarProductos() pueda mostrar el estado de error.
+  async function fetchProductos() {
+    const { data, error } = await supabase
+      .from("productos")
+      .select("*")
+      .order("id", { ascending: true });
+    if (error) throw error;
+    return (data || []).map(normalizarProducto);
+  }
+
+  // Estado "Cargando…" dentro de la tabla mientras Supabase responde.
+  function showProductsLoading() {
+    const tbody = document.getElementById("tableBody");
+    if (!tbody) return;
+    tbody.innerHTML = `
+      <div class="empty-state">
+        <div class="ic">⏳</div>
+        <div class="t">Cargando productos…</div>
+        <div class="d">Trayendo el catálogo desde la base de datos.</div>
+      </div>`;
+  }
+
+  // Estado de error con botón "Reintentar".
+  function showProductsError() {
+    const tbody = document.getElementById("tableBody");
+    if (!tbody) return;
+    tbody.innerHTML = `
+      <div class="empty-state">
+        <div class="ic">⚠️</div>
+        <div class="t">No se pudo cargar el catálogo</div>
+        <div class="d">Revisa tu conexión e inténtalo de nuevo.</div>
+        <button class="btn-new" id="productsRetry" style="margin-top:14px">Reintentar</button>
+      </div>`;
+    const retry = document.getElementById("productsRetry");
+    if (retry) retry.onclick = cargarYMostrarProductos;
+  }
+
+  // Orquesta la carga: muestra "Cargando", trae de Supabase y pinta tabla+stats;
+  // si algo falla, muestra el estado de error.
+  async function cargarYMostrarProductos() {
+    showProductsLoading();
+    try {
+      state.products = await fetchProductos();
+      renderStats();
+      renderTable();
+    } catch (e) {
+      console.error("Error cargando productos desde Supabase:", e);
+      showProductsError();
+      toast("No se pudo cargar el catálogo", "error");
+    }
+  }
+
   // ---------- helpers ----------
   function escapeHTML(s) {
     return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
@@ -82,8 +153,8 @@ import { supabase } from "./supabase-config.js";
   function showApp() {
     document.getElementById("loginShell").style.display = "none";
     document.getElementById("appShell").style.display = "grid";
-    renderStats();
-    renderTable();
+    // Catálogo desde Supabase (muestra "Cargando…", luego tabla + stats).
+    cargarYMostrarProductos();
     applyThemeFromStorage();
     applyAccentFromStorage();
   }
@@ -370,7 +441,7 @@ import { supabase } from "./supabase-config.js";
     const total = state.products.length;
     const onSale = state.products.filter(p => p.oldPrice && p.oldPrice > p.price).length;
     const avg = total ? Math.round(state.products.reduce((s, p) => s + Number(p.price), 0) / total) : 0;
-    const cats = new Set(state.products.map(p => p.cat)).size;
+    const cats = new Set(state.products.flatMap(p => Array.isArray(p.cats) ? p.cats : [])).size;
     document.getElementById("statTotal").textContent = total;
     document.getElementById("statOferta").textContent = onSale;
     document.getElementById("statAvg").textContent = avg;
@@ -708,7 +779,8 @@ import { supabase } from "./supabase-config.js";
 
   // ---------- init ----------
   document.addEventListener("DOMContentLoaded", async () => {
-    state.products = loadProducts();
+    // El catálogo ya NO se carga desde localStorage al arrancar. Se trae desde
+    // Supabase dentro de showApp(), es decir, solo cuando hay sesión activa.
 
     // Auth state — verifica si ya hay sesión activa en Supabase
     const { data: { session } } = await supabase.auth.getSession();
