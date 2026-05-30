@@ -144,6 +144,37 @@ import { supabase } from "./supabase-config.js";
     toast._t = setTimeout(() => t.className = "toast", 2200);
   }
 
+  // ---------- escritura en Supabase ----------
+  // Mapeo inverso a normalizarProducto(): de un producto interno a las columnas
+  // (en español) de la tabla `productos`. La oferta está SINCRONIZADA con el
+  // precio anterior: en_oferta es true solo si hay un precio anterior mayor.
+  function productoADB(p) {
+    const enOferta = !!(p.oldPrice && p.oldPrice > p.price);
+    return {
+      nombre: p.name,
+      precio: p.price,
+      precio_anterior: enOferta ? p.oldPrice : null,
+      en_oferta: enOferta,
+      categorias: Array.isArray(p.cats) ? p.cats : [],
+      caracteristicas: Array.isArray(p.features) ? p.features : []
+    };
+  }
+
+  // Manejo central de errores de escritura. Si ya no hay sesión activa (la
+  // sesión expiró), avisa y devuelve al login. En cualquier otro caso muestra
+  // el error en un toast. Quien llama ya se encargó de revertir la UI optimista.
+  async function reportError(error, mensajeBase) {
+    console.error(mensajeBase + ":", error);
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      toast("Tu sesión expiró. Inicia sesión de nuevo.", "error");
+      try { await supabase.auth.signOut(); } catch (e) {}
+      showLogin();
+      return;
+    }
+    toast(mensajeBase + ": " + (error?.message || "error"), "error");
+  }
+
   // ---------- render: login ----------
   function showLogin() {
     document.getElementById("loginShell").style.display = "grid";
@@ -515,68 +546,148 @@ import { supabase } from "./supabase-config.js";
   }
 
   // ---------- inline updates ----------
-  function updateField(id, field, value) {
+  // Edición en línea con UI optimista: aplica el cambio al estado y a la vista
+  // de inmediato y, en paralelo, lo guarda en Supabase. Si la escritura falla,
+  // revierte al valor anterior y avisa. El "guard" de "sin cambios" evita una
+  // doble escritura (los listeners `change` y `blur` llaman ambos a esta fn).
+  async function updateField(id, field, value) {
     const p = state.products.find(x => x.id === id);
     if (!p) return;
+
+    // snapshot para poder revertir si Supabase rechaza el cambio
+    const before = { name: p.name, price: p.price, oldPrice: p.oldPrice, badge: p.badge };
+    let patch = null;
+
     if (field === "name") {
-      p.name = String(value).trim() || p.name;
+      const v = String(value).trim();
+      if (!v || v === p.name) return;            // vacío o sin cambios → nada
+      p.name = v;
+      patch = { nombre: p.name };
     } else if (field === "price") {
       const n = parseFloat(value);
-      if (!isNaN(n) && n > 0) p.price = n;
+      if (isNaN(n) || n <= 0 || n === p.price) return;
+      p.price = n;
+      // si el precio nuevo supera al "antes", la oferta deja de tener sentido
+      const enOferta = !!(p.oldPrice && p.oldPrice > p.price);
+      if (!enOferta) { delete p.oldPrice; delete p.badge; }
+      patch = { precio: p.price, en_oferta: enOferta, precio_anterior: enOferta ? p.oldPrice : null };
     } else if (field === "oldPrice") {
       const v = String(value).trim();
-      if (!v) { delete p.oldPrice; delete p.badge; }
-      else {
+      if (!v) {
+        if (p.oldPrice == null) return;          // ya estaba vacío
+        delete p.oldPrice; delete p.badge;
+        patch = { precio_anterior: null, en_oferta: false };
+      } else {
         const n = parseFloat(v);
-        if (!isNaN(n) && n > p.price) {
-          p.oldPrice = n;
-          if (!p.badge) p.badge = "Oferta";
-        }
+        if (isNaN(n) || n <= p.price || n === p.oldPrice) return;
+        p.oldPrice = n;
+        p.badge = "Oferta";
+        patch = { precio_anterior: n, en_oferta: true };
       }
-    } else if (field === "cat") {
-      // legacy single-cat input no longer used
-      p.cats = [value];
+    } else {
+      return;
     }
-    saveProducts();
-    renderStats();
+
+    renderStats(); // UI optimista (la tabla la repinta el handler de blur)
+
+    const { error } = await supabase.from("productos").update(patch).eq("id", id);
+    if (error) {
+      // revertir al snapshot
+      p.name = before.name; p.price = before.price;
+      if (before.oldPrice == null) delete p.oldPrice; else p.oldPrice = before.oldPrice;
+      if (before.badge == null) delete p.badge; else p.badge = before.badge;
+      renderTable(); renderStats();
+      reportError(error, "No se pudo guardar el cambio");
+    }
   }
 
-  function toggleOferta(id) {
+  async function toggleOferta(id) {
     const p = state.products.find(x => x.id === id);
     if (!p) return;
-    if (p.oldPrice && p.oldPrice > p.price) {
+    const before = { oldPrice: p.oldPrice, badge: p.badge };
+
+    const turningOff = !!(p.oldPrice && p.oldPrice > p.price);
+    let patch;
+    if (turningOff) {
       delete p.oldPrice;
       delete p.badge;
+      patch = { en_oferta: false, precio_anterior: null };
       toast("Oferta desactivada");
     } else {
       p.oldPrice = Math.round(p.price * 1.2);
       p.badge = "Oferta";
+      patch = { en_oferta: true, precio_anterior: p.oldPrice };
       toast("Oferta activada — ajusta el precio original si lo necesitas", "success");
     }
-    saveProducts(); renderTable(); renderStats();
-  }
+    renderTable(); renderStats(); // UI optimista
 
-  function deleteProduct(id) {
-    const p = state.products.find(x => x.id === id);
-    if (!p) return;
-    if (confirm(`¿Eliminar "${p.name}"?`)) {
-      state.products = state.products.filter(x => x.id !== id);
-      saveProducts(); renderTable(); renderStats();
-      toast("Producto eliminado");
+    const { error } = await supabase.from("productos").update(patch).eq("id", id);
+    if (error) {
+      if (before.oldPrice == null) delete p.oldPrice; else p.oldPrice = before.oldPrice;
+      if (before.badge == null) delete p.badge; else p.badge = before.badge;
+      renderTable(); renderStats();
+      reportError(error, "No se pudo cambiar la oferta");
     }
   }
 
-  function addProduct() {
-    const id = "p" + Date.now();
-    state.products.unshift({
-      id, name: "Nuevo producto", cats: ["detalles"], price: 100, img: ""
-    });
-    saveProducts(); renderTable(); renderStats();
-    toast("Producto añadido — edita los datos", "success");
-    setTimeout(() => {
-      const first = document.querySelector(`.row[data-id="${id}"] .name-input`);
-      if (first) { first.focus(); first.select(); }
-    }, 50);
+  async function deleteProduct(id) {
+    const idx = state.products.findIndex(x => x.id === id);
+    if (idx < 0) return;
+    const p = state.products[idx];
+    if (!confirm(`¿Eliminar "${p.name}"?`)) return;
+
+    // optimista: quitar de la tabla antes de confirmar con la base de datos
+    state.products.splice(idx, 1);
+    renderTable(); renderStats();
+    toast("Producto eliminado");
+
+    const { error } = await supabase.from("productos").delete().eq("id", id);
+    if (error) {
+      // revertir: reinsertar el producto en su posición original
+      state.products.splice(idx, 0, p);
+      renderTable(); renderStats();
+      reportError(error, "No se pudo eliminar el producto");
+    }
+  }
+
+  // INSERT en Supabase. No es optimista: necesitamos el `id` real que genera la
+  // base de datos antes de pintar la fila (para que las ediciones posteriores
+  // apunten al registro correcto). Mientras tanto, deshabilitamos el botón.
+  async function addProduct() {
+    const btn = document.getElementById("btnNew");
+    if (btn) btn.disabled = true;
+
+    const nuevo = {
+      nombre: "Nuevo producto",
+      precio: 100,
+      precio_anterior: null,
+      en_oferta: false,
+      imagen_url: "",
+      categorias: ["detalles"],
+      caracteristicas: []
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from("productos")
+        .insert(nuevo)
+        .select()
+        .single();
+      if (error) throw error;
+
+      const p = normalizarProducto(data);
+      state.products.unshift(p);
+      renderTable(); renderStats();
+      toast("Producto añadido — edita los datos", "success");
+      setTimeout(() => {
+        const first = document.querySelector(`.row[data-id="${p.id}"] .name-input`);
+        if (first) { first.focus(); first.select(); }
+      }, 50);
+    } catch (error) {
+      reportError(error, "No se pudo añadir el producto");
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   }
 
   // ---------- categories popover ----------
@@ -611,26 +722,35 @@ import { supabase } from "./supabase-config.js";
     pop.style.top  = (window.scrollY + r.bottom + 6) + "px";
     pop.style.left = (window.scrollX + r.left) + "px";
 
-    // interactions
-    pop.addEventListener("click", (e) => {
+    // interactions — cada toggle persiste las categorías en Supabase (optimista)
+    pop.addEventListener("click", async (e) => {
       const item = e.target.closest(".cats-pop-item");
       if (item) {
         const cat = item.dataset.cat;
+        const before = p.cats.slice(); // snapshot para revertir
+
         if (cats.has(cat)) cats.delete(cat); else cats.add(cat);
         p.cats = [...cats];
         if (p.cats.length === 0) p.cats = ["detalles"]; // siempre al menos una
-        saveProducts();
-        // refresh popover visual + table row + stats
-        item.classList.toggle("on", cats.has(cat));
-        item.querySelector(".check").textContent = cats.has(cat) ? "✓" : "";
+        // mantener el Set en sintonía con p.cats (por si forzamos "detalles")
+        cats.clear(); p.cats.forEach(c => cats.add(c));
+
+        // refresco visual optimista del popover + tabla + stats
+        paintCatsItems(pop, cats);
         renderTable();
         renderStats();
-        // re-attach popover position to new row element
-        const newRow = document.querySelector(`.row[data-id="${productId}"]`);
-        if (newRow) {
-          const nb = newRow.querySelector(".cat-picker").getBoundingClientRect();
-          pop.style.top  = (window.scrollY + nb.bottom + 6) + "px";
-          pop.style.left = (window.scrollX + nb.left) + "px";
+        positionCatsPopover(pop, productId);
+
+        const { error } = await supabase
+          .from("productos").update({ categorias: p.cats }).eq("id", productId);
+        if (error) {
+          p.cats = before;
+          cats.clear(); before.forEach(c => cats.add(c));
+          paintCatsItems(pop, cats);
+          renderTable();
+          renderStats();
+          positionCatsPopover(pop, productId);
+          reportError(error, "No se pudieron guardar las categorías");
         }
       }
       if (e.target.closest(".cats-pop-done")) closeCatsPopover();
@@ -653,6 +773,23 @@ import { supabase } from "./supabase-config.js";
   function closeCatsPopover() {
     const pop = document.getElementById("catsPop");
     if (pop) pop.remove();
+  }
+  // Repinta las marcas (✓ / clase "on") de cada categoría según el Set actual.
+  function paintCatsItems(pop, cats) {
+    pop.querySelectorAll(".cats-pop-item").forEach(it => {
+      const on = cats.has(it.dataset.cat);
+      it.classList.toggle("on", on);
+      it.querySelector(".check").textContent = on ? "✓" : "";
+    });
+  }
+  // Reubica el popover junto al botón de categorías de la fila (que se recrea
+  // en cada renderTable()).
+  function positionCatsPopover(pop, productId) {
+    const row = document.querySelector(`.row[data-id="${productId}"]`);
+    if (!row) return;
+    const b = row.querySelector(".cat-picker").getBoundingClientRect();
+    pop.style.top  = (window.scrollY + b.bottom + 6) + "px";
+    pop.style.left = (window.scrollX + b.left) + "px";
   }
 
   // ---------- features modal ----------
@@ -717,19 +854,33 @@ import { supabase } from "./supabase-config.js";
     list.appendChild(row);
     return input;
   }
-  function saveFeatures() {
+  async function saveFeatures() {
     const id = state.editingId;
     const p = state.products.find(x => x.id === id);
     if (!p) return;
+    const before = Array.isArray(p.features) ? p.features.slice() : undefined;
+
     const values = Array.from(document.querySelectorAll("#featList input"))
       .map(i => i.value.trim())
       .filter(Boolean);
     if (values.length) p.features = values;
     else delete p.features;
-    saveProducts();
+
+    // optimista: cerrar el modal y reflejar el conteo en la tabla
     closeFeaturesModal();
     renderTable();
-    toast("Características guardadas", "success");
+
+    const { error } = await supabase
+      .from("productos")
+      .update({ caracteristicas: p.features || [] })
+      .eq("id", id);
+    if (error) {
+      if (before === undefined) delete p.features; else p.features = before;
+      renderTable();
+      reportError(error, "No se pudieron guardar las características");
+    } else {
+      toast("Características guardadas", "success");
+    }
   }
   function closeFeaturesModal() {
     document.getElementById("featuresModal").classList.remove("open");
