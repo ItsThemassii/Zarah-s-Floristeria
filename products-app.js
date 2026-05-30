@@ -1,5 +1,7 @@
 /* Productos page — catálogo público (solo lectura).
    La administración se hace desde admin.html — el cliente nunca ve botones de edición. */
+import { supabase } from "./supabase-config.js";
+
 (function () {
   const STORAGE_KEY = "zarah_products_v1";
   const PER_PAGE = 12;
@@ -36,17 +38,35 @@
     return changed;
   }
 
-  function loadProducts() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-      if (Array.isArray(saved) && saved.length) {
-        if (migrateProducts(saved)) localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-        return saved;
-      }
-    } catch (e) {}
-    const init = JSON.parse(JSON.stringify(window.INITIAL_PRODUCTS));
-    migrateProducts(init);
-    return init;
+  // ---------- normalización Supabase → formato interno ----------
+  // La tabla `productos` usa nombres de columna distintos a los que espera el
+  // resto del código. Esta función traduce una fila de Supabase al objeto que
+  // ya consumen render(), el modal, la búsqueda, etc. Así nada más cambia.
+  function normalizarProducto(row) {
+    return {
+      // dataset.id siempre es string; convertimos para que las búsquedas
+      // `x.id === id` sigan funcionando.
+      id: String(row.id),
+      name: row.nombre,
+      price: Number(row.precio),
+      oldPrice: (row.precio_anterior != null) ? Number(row.precio_anterior) : undefined,
+      // no hay columna de texto "badge": la derivamos del flag en_oferta.
+      badge: row.en_oferta ? "Oferta" : "",
+      img: row.imagen_url || "",
+      cats: Array.isArray(row.categorias) ? row.categorias : [],
+      features: Array.isArray(row.caracteristicas) ? row.caracteristicas : []
+    };
+  }
+
+  // Antes leía localStorage / window.INITIAL_PRODUCTS. Ahora trae el catálogo
+  // desde Supabase. Devuelve el mismo formato de array que antes.
+  async function loadProducts() {
+    const { data, error } = await supabase
+      .from("productos")
+      .select("*")
+      .order("id", { ascending: true });
+    if (error) throw error;
+    return (data || []).map(normalizarProducto);
   }
 
   // ---------- helpers ----------
@@ -71,6 +91,72 @@
     t.className = "toast show" + (kind ? " " + kind : "");
     clearTimeout(toast._t);
     toast._t = setTimeout(() => t.className = "toast", 2200);
+  }
+
+  // ---------- estados de carga del catálogo ----------
+  // 6 skeleton cards con pulse mientras Supabase responde.
+  function showCatalogLoading() {
+    const grid = document.getElementById("catalog");
+    if (!grid) return;
+    grid.classList.remove("catalog-enter");
+    let html = "";
+    for (let i = 0; i < 6; i++) {
+      html += `
+        <div class="skel-card" aria-hidden="true">
+          <div class="skel-img"></div>
+          <div class="skel-body">
+            <div class="skel-line name"></div>
+            <div class="skel-line price"></div>
+          </div>
+        </div>`;
+    }
+    grid.innerHTML = html;
+  }
+
+  // Mensaje amigable + botón Reintentar (vuelve a lanzar la carga).
+  function showCatalogError() {
+    const grid = document.getElementById("catalog");
+    if (grid) {
+      grid.classList.remove("catalog-enter");
+      grid.innerHTML = `
+        <div class="catalog-error">
+          <div class="ce-emoji">🌸</div>
+          <div class="ce-title">No pudimos cargar el catálogo</div>
+          <p class="ce-text">Puede ser un problema momentáneo de conexión. Intenta de nuevo; si el problema persiste, escríbenos por WhatsApp y armamos tu pedido contigo.</p>
+          <button class="catalog-retry" id="catalogRetry" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+            Reintentar
+          </button>
+        </div>`;
+      const btn = document.getElementById("catalogRetry");
+      if (btn) btn.addEventListener("click", cargarCatalogo);
+    }
+    const rc = document.getElementById("resultCount");
+    if (rc) rc.textContent = "— productos";
+  }
+
+  // Pinta las cards aplicando el fade-in suave solo esta vez (carga inicial /
+  // reintento). Se quita la clase para que filtros, orden y paginación no
+  // re-animen en cada render.
+  function renderConFade() {
+    const grid = document.getElementById("catalog");
+    if (grid) grid.classList.add("catalog-enter");
+    render();
+    if (grid) setTimeout(() => grid.classList.remove("catalog-enter"), 1000);
+  }
+
+  // Flujo completo de carga del catálogo: skeleton → query → render / error.
+  async function cargarCatalogo() {
+    showCatalogLoading();
+    try {
+      state.products = await loadProducts();
+      renderConFade();
+      updateCartBadge();
+      updateFavBadge();
+    } catch (e) {
+      console.error("Error cargando productos desde Supabase:", e);
+      showCatalogError();
+    }
   }
 
   // ---------- render ----------
@@ -237,6 +323,33 @@
     return msg;
   }
 
+  // ---------- registro automático de pedidos en Supabase ----------
+  // Junta las dedicatorias no vacías de una lista de items en un solo texto.
+  function dedicatoriaDe(items) {
+    const ds = (items || []).map(i => i.dedi).filter(Boolean);
+    return ds.length ? ds.join(" · ") : null;
+  }
+
+  // Guarda el pedido en la tabla `ventas` ANTES de abrir WhatsApp.
+  // Es un "extra": se dispara sin await (fire-and-forget) para no bloquear la
+  // navegación a WhatsApp. Si falla (red, permisos, etc.), solo se loguea: el
+  // flujo principal del cliente nunca se interrumpe.
+  function guardarVenta(venta) {
+    supabase.from("ventas").insert({
+      cliente_nombre: null,
+      cliente_whatsapp: null,
+      productos: venta.productos,
+      total: venta.total,
+      estado: "pendiente",
+      dedicatoria: venta.dedicatoria || null,
+      notas: null
+    }).then(({ error }) => {
+      if (error) console.log("No se pudo registrar el pedido en ventas:", error);
+    }).catch(e => {
+      console.log("No se pudo registrar el pedido en ventas:", e);
+    });
+  }
+
   function openProductModal(p) {
     const m = document.getElementById("productModal");
     if (!m) return;
@@ -286,6 +399,17 @@
       const extras = getModalExtras();
       const msg = encodeURIComponent(buildWhatsappMsg(p, extras));
       reserveBtn.href = `https://wa.me/51994684237?text=${msg}`;
+
+      // Registrar el pedido en `ventas` (1 producto) antes de abrir WhatsApp.
+      // Fire-and-forget: no bloquea la navegación del enlace.
+      const item = { id: p.id, name: p.name, price: p.price, img: p.img, qty: 1 };
+      if (extras.customName) item.customName = extras.customName;
+      if (extras.dedi) item.dedi = extras.dedi;
+      guardarVenta({
+        productos: [item],
+        total: Number(p.price),
+        dedicatoria: extras.dedi || null
+      });
       // continuar con la navegación normal
     };
 
@@ -539,7 +663,18 @@
     msg += `━━━━━━━━━━━━━━━\n`;
     msg += `*TOTAL: S/ ${total.toFixed(2)}*\n\n`;
     msg += `¿Tienen disponibilidad? Quedo atenta(o) para coordinar la entrega y el pago. ¡Gracias! 💕`;
-    document.getElementById("spCheckout").href = `https://wa.me/51994684237?text=${encodeURIComponent(msg)}`;
+    const checkout = document.getElementById("spCheckout");
+    checkout.href = `https://wa.me/51994684237?text=${encodeURIComponent(msg)}`;
+
+    // Registrar el pedido en `ventas` (carrito completo) antes de abrir WhatsApp.
+    // Fire-and-forget: el enlace abre WhatsApp igual, falle o no la inserción.
+    checkout.onclick = () => {
+      guardarVenta({
+        productos: cart,
+        total: total,
+        dedicatoria: dedicatoriaDe(cart)
+      });
+    };
   }
 
   function handleSidePanelClick(e) {
@@ -654,12 +789,10 @@
   }
 
   // ---------- init ----------
-  document.addEventListener("DOMContentLoaded", () => {
-    state.products = loadProducts();
+  document.addEventListener("DOMContentLoaded", async () => {
+    // Las categorías y los listeners no dependen de los datos de productos,
+    // así que se preparan de inmediato mientras el catálogo carga.
     renderChips();
-    render();
-    updateCartBadge();
-    updateFavBadge();
 
     document.getElementById("sortSelect").addEventListener("change", (e) => {
       state.sort = e.target.value; render();
@@ -695,8 +828,8 @@
     // Re-render si otro tab (admin) cambia productos
     window.addEventListener("storage", (e) => {
       if (e.key === STORAGE_KEY) {
-        state.products = loadProducts();
-        render();
+        // loadProducts ahora es async (lee de Supabase); recargamos y re-pintamos.
+        loadProducts().then(prods => { state.products = prods; render(); }).catch(() => {});
       }
       if (e.key === CART_KEY) updateCartBadge();
       if (e.key === FAV_KEY) { updateFavBadge(); applyFavStates(); }
@@ -709,5 +842,10 @@
         if (e.target === pm || e.target.closest("[data-close]")) closeProductModal();
       });
     }
+
+    // Cargar el catálogo desde Supabase (skeleton → render con fade / error).
+    // El resto del flujo (filtros, modal, etc.) funciona igual: solo cambió de
+    // dónde vienen los productos.
+    await cargarCatalogo();
   });
 })();

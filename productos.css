@@ -718,3 +718,86 @@ footer {
   .catalog { grid-template-columns: repeat(3, 1fr); }
 }
 /* Fine-tuning handled in mobile.css */
+
+/* ===== Skeleton de carga (mientras Supabase responde) ===== */
+.skel-card {
+  background: var(--card);
+  border-radius: 8px;
+  display: flex; flex-direction: column;
+}
+.skel-img {
+  aspect-ratio: 1 / 1.15;
+  border-radius: 6px;
+}
+.skel-body { padding: 18px 8px 6px; text-align: center; }
+.skel-line {
+  height: 11px;
+  margin: 0 auto;
+  border-radius: 999px;
+}
+.skel-line.name { width: 72%; min-height: 11px; }
+.skel-line.price { width: 42%; height: 13px; margin-top: 14px; }
+/* Relleno rosa pastel (tono del sitio) + animación pulse */
+.skel-img, .skel-line {
+  background: rgba(214, 58, 122, 0.10);
+  animation: skel-pulse 1.4s ease-in-out infinite;
+}
+@keyframes skel-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skel-img, .skel-line { animation: none; }
+}
+
+/* ===== Fade-in de las cards reales al reemplazar el skeleton ===== */
+.catalog-enter .p-card {
+  animation: card-fade-in 0.55s cubic-bezier(.2,.7,.2,1) both;
+}
+@keyframes card-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.catalog-enter .p-card:nth-child(1) { animation-delay: 0s; }
+.catalog-enter .p-card:nth-child(2) { animation-delay: .05s; }
+.catalog-enter .p-card:nth-child(3) { animation-delay: .10s; }
+.catalog-enter .p-card:nth-child(4) { animation-delay: .15s; }
+.catalog-enter .p-card:nth-child(5) { animation-delay: .20s; }
+.catalog-enter .p-card:nth-child(6) { animation-delay: .25s; }
+.catalog-enter .p-card:nth-child(7) { animation-delay: .30s; }
+.catalog-enter .p-card:nth-child(8) { animation-delay: .35s; }
+@media (prefers-reduced-motion: reduce) {
+  .catalog-enter .p-card { animation: none; }
+}
+
+/* ===== Estado de error del catálogo ===== */
+.catalog-error {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 70px 24px;
+}
+.catalog-error .ce-emoji { font-size: 40px; line-height: 1; }
+.catalog-error .ce-title {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-top: 12px;
+}
+.catalog-error .ce-text {
+  font-size: 14px;
+  color: var(--ink-soft);
+  max-width: 440px;
+  margin: 12px auto 0;
+  line-height: 1.6;
+}
+.catalog-retry {
+  margin-top: 24px;
+  background: var(--accent); color: var(--cream);
+  padding: 13px 28px;
+  border-radius: 999px;
+  font-size: 14px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: background .2s, transform .2s;
+}
+.catalog-retry:hover { background: var(--accent-deep); transform: translateY(-1px); }
