@@ -200,3 +200,39 @@ create policy "configuracion: borrar solo autenticados"
     for delete
     to authenticated
     using (true);
+
+
+-- ============================================================================
+-- POLÍTICAS RLS DEL STORAGE BUCKET `productos-imagenes`
+-- ============================================================================
+-- Las imágenes de los productos viven en el bucket de Storage
+-- `productos-imagenes`. El bucket es público, así que la LECTURA ya está
+-- permitida para cualquiera (la tienda muestra las fotos sin login).
+--
+-- Estas 3 políticas dan permiso de ESCRITURA solo al admin autenticado, que es
+-- quien sube/reemplaza/borra imágenes desde el panel:
+--   - INSERT  → subir una imagen nueva al bucket (subirYGuardarImagen()).
+--   - UPDATE  → reemplazar el archivo de una imagen existente.
+--   - DELETE  → borrar imágenes huérfanas (limpieza, mejora futura).
+--
+-- Se aplican sobre storage.objects, filtrando por bucket_id para que solo
+-- afecten a este bucket y no a otros.
+-- ============================================================================
+
+CREATE POLICY "Authenticated users can upload product images"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'productos-imagenes');
+
+CREATE POLICY "Authenticated users can update product images"
+ON storage.objects
+FOR UPDATE
+TO authenticated
+USING (bucket_id = 'productos-imagenes');
+
+CREATE POLICY "Authenticated users can delete product images"
+ON storage.objects
+FOR DELETE
+TO authenticated
+USING (bucket_id = 'productos-imagenes');

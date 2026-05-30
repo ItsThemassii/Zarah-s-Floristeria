@@ -459,6 +459,8 @@ Tabla de un solo registro (singleton).
 - Escritura solo para admin autenticado.
 - Path: `productos/{product_id}.jpg` (o similar).
 
+> **Estado real (implementado):** el bucket se llama **`productos-imagenes`** y ya está en uso desde el panel admin. Es **público**, por lo que la **lectura** está permitida para cualquiera por defecto (la tienda muestra las fotos sin login). Además tiene **3 políticas RLS sobre `storage.objects` para usuarios `authenticated`** — **INSERT**, **UPDATE** y **DELETE**, todas filtradas por `bucket_id = 'productos-imagenes'` — que dan permiso de escritura solo al admin logueado. El SQL exacto está en `database/schema.sql`.
+
 ### Claves que NO se migran
 
 - `zarah_cart_v1` — recomendado dejar en localStorage (estado temporal por navegador).
